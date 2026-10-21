@@ -107,8 +107,8 @@
 <text x="762.7" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">N11</text>
 <line x1="779.4" y1="326.7" x2="779.4" y2="442" stroke="#444746" stroke-width="1"/>
 <text x="846.9" y="346.2" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">13</text>
-<rect x="880" y="330.7" width="30.3" height="16" rx="4" fill="#616161"/>
-<text x="895.2" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">PRC</text>
+<rect x="864.3" y="330.7" width="46" height="16" rx="4" fill="#8e24aa"/>
+<text x="887.3" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">Course</text>
 <line x1="914.3" y1="326.7" x2="914.3" y2="442" stroke="#444746" stroke-width="1"/>
 <text x="981.7" y="346.2" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">14</text>
 <line x1="1049.1" y1="326.7" x2="1049.1" y2="442" stroke="#444746" stroke-width="1"/>
