@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Google Calendar – Shift Badges
 // @namespace    gcal-shift-badges
-// @version      1.0.1
-// @description  Shows shift codes (D11, N11, DOV, PRC …) as small colored badges in the top-right corner of each day in Google Calendar's month view, like aCalendar's corner info, and hides the normal event bars for them.
+// @version      1.1.0
+// @description  Shows shift codes (D11, N11, DOV, PRC …) as small colored badges in the top-right corner of each day in Google Calendar's month view, like aCalendar's corner info. Reads them from the event bars (and hides those) or from the shift calendar's iCal feed.
 // @author       mikulik86
 // @license      MIT
 // @homepageURL  https://github.com/mikulik86/gcal-shift-badges
@@ -35,18 +35,20 @@
     ],
     textColor: '#ffffff',
 
-    // true = hide the normal event bars of matched shift events.
+    // Default mode (no iCal address): badges are read from the event bars on
+    // the page. true = hide those event bars.
     hideEventBars: true,
 
-    // Only treat events whose (hidden) chip text mentions this calendar name
-    // as shifts. '' = accept matching titles from any calendar.
+    // Default mode only: treat events as shifts only if their (hidden) chip
+    // text mentions this calendar name. '' = matching titles from any calendar.
     calendarName: '',
 
     // --- Optional "iCal mode" -------------------------------------------
-    // Paste the shift calendar's "Secret address in iCal format" here
-    // (Google Calendar → Settings → your shift calendar → Integrate calendar).
-    // Then you can untick that calendar in the left sidebar: the badges still
-    // appear, and the empty line left by hidden event bars disappears.
+    // Set the shift calendar's "Secret address in iCal format" via the
+    // Tampermonkey menu → "Shift badges: set iCal address" (kept across script
+    // updates), or paste it here. In iCal mode the badges come only from that
+    // feed and the event bars are left completely alone: whether the shift
+    // calendar also shows as normal events is up to its tick box in the sidebar.
     icsUrl: '',
     icsRefreshMinutes: 30,
     // In iCal mode, also show titles that match no rule (in a neutral color).
@@ -279,28 +281,74 @@
     log(`iCal: ${count} events`);
   }
 
+  // The iCal address: menu setting (stored, survives updates) > CONFIG.icsUrl.
+  // On first run of this version, an address cached by v1.0 is adopted.
+  const store = {
+    get: (k, d) => (typeof GM_getValue === 'function' ? GM_getValue(k, d) : d),
+    set: (k, v) => { if (typeof GM_setValue === 'function') GM_setValue(k, v); },
+  };
+  (function migrateIcsUrl() {
+    if (store.get('icsUrl', null) !== null || CONFIG.icsUrl) return;
+    const cached = store.get('icsCache', null);
+    if (cached && cached.url) store.set('icsUrl', cached.url);
+  })();
+
+  function getIcsUrl() {
+    const stored = store.get('icsUrl', null);
+    return stored !== null ? stored : CONFIG.icsUrl;
+  }
+
+  function resetIcs() {
+    ics.byDate = new Map(); ics.events = 0; ics.fetchedAt = 0; ics.error = null;
+  }
+
   function loadIcs(force) {
-    if (!CONFIG.icsUrl || ics.loading) return;
-    const cached = typeof GM_getValue === 'function' ? GM_getValue('icsCache', null) : null;
-    if (cached && cached.url === CONFIG.icsUrl && !ics.fetchedAt) applyIcsText(cached.text, cached.t);
+    const url = getIcsUrl();
+    if (!url || ics.loading) return;
+    const cached = store.get('icsCache', null);
+    if (cached && cached.url === url && !ics.fetchedAt) applyIcsText(cached.text, cached.t);
     const fresh = Date.now() - ics.fetchedAt < CONFIG.icsRefreshMinutes * 60e3;
     if (fresh && !force) return;
     ics.loading = true;
     GM_xmlhttpRequest({
       method: 'GET',
-      url: CONFIG.icsUrl,
+      url,
       onload: (res) => {
         ics.loading = false;
+        if (url !== getIcsUrl()) return; // address changed meanwhile
         if (res.status !== 200 || !/BEGIN:VCALENDAR/.test(res.responseText || '')) {
-          ics.error = `HTTP ${res.status}`; log('iCal fetch failed', res.status); return;
+          ics.error = `HTTP ${res.status}`; log('iCal fetch failed', res.status); schedule(); return;
         }
         const t = Date.now();
         applyIcsText(res.responseText, t);
-        if (typeof GM_setValue === 'function') GM_setValue('icsCache', { url: CONFIG.icsUrl, t, text: res.responseText });
+        store.set('icsCache', { url, t, text: res.responseText });
         schedule();
       },
-      onerror: () => { ics.loading = false; ics.error = 'network error'; },
+      onerror: () => { ics.loading = false; ics.error = 'network error'; schedule(); },
     });
+  }
+
+  function askForIcsUrl() {
+    const current = getIcsUrl();
+    const input = prompt(
+      'Secret address in iCal format of your shift calendar\n'
+      + '(Google Calendar → Settings → the calendar → Integrate calendar).\n\n'
+      + 'Leave empty to switch iCal mode off.',
+      current,
+    );
+    if (input === null) return; // cancelled
+    const url = input.trim();
+    if (url && !/^https:\/\/calendar\.google\.com\/calendar\/ical\//.test(url)) {
+      alert('That doesn\'t look like a Google Calendar iCal address.\nIt should start with https://calendar.google.com/calendar/ical/');
+      return;
+    }
+    store.set('icsUrl', url);
+    store.set('icsCache', null);
+    resetIcs();
+    if (url) loadIcs(true);
+    schedule();
+    alert(url ? 'iCal mode on. Badges now come from the feed; event bars are left alone.'
+      : 'iCal mode off. Badges are read from the event bars again.');
   }
 
   /* ----------------------------- render ------------------------------ */
@@ -331,14 +379,16 @@
 
   function render() {
     const main = document.querySelector('[role="main"]') || document.body;
-    const info = { view: 'other', cells: 0, rows: 0, dating: '-', chips: 0, shiftChips: 0, badgedCells: 0 };
+    const icsUrl = getIcsUrl();
+    const info = { mode: icsUrl ? 'iCal' : 'event bars', view: 'other', cells: 0, rows: 0,
+      dating: '-', chips: 0, shiftChips: 0, badgedCells: 0 };
     lastRun.info = info;
 
     if (isOtherView()) { clearAll(main); return; }
 
-    // Temporarily show hidden chips so they can be measured (no paint in between).
-    const wasHidden = [...main.querySelectorAll('.' + HIDE_CLASS)];
-    wasHidden.forEach((c) => c.classList.remove(HIDE_CLASS));
+    // Show any bars hidden earlier: in iCal mode they stay visible; in the
+    // default mode they're measured and re-hidden below (no paint in between).
+    main.querySelectorAll('.' + HIDE_CLASS).forEach((c) => c.classList.remove(HIDE_CLASS));
 
     const cells = findDayCells(main);
     info.cells = cells.length;
@@ -349,23 +399,23 @@
     const want = new Map(cells.map((c) => [c.el, []]));
     const add = (el, code) => { const l = want.get(el); if (l && !l.includes(code)) l.push(code); };
 
-    // Source 1: event chips on the page.
-    const chips = findChips(main);
-    info.chips = chips.length;
-    const shiftChips = [];
-    for (const chip of chips) {
-      const code = codeFromText(chipText(chip));
-      if (!code) continue;
-      const r = chip.getBoundingClientRect();
-      if (!r.width || !r.height) continue;
-      shiftChips.push(chip);
-      for (const c of cellsForRect(r, cells)) add(c.el, code);
-    }
-    info.shiftChips = shiftChips.length;
-    if (CONFIG.hideEventBars) shiftChips.forEach((c) => c.classList.add(HIDE_CLASS));
-
-    // Source 2: iCal feed (optional).
-    if (CONFIG.icsUrl) {
+    if (!icsUrl) {
+      // Default mode: read shift events from the event bars on the page.
+      const chips = findChips(main);
+      info.chips = chips.length;
+      const shiftChips = [];
+      for (const chip of chips) {
+        const code = codeFromText(chipText(chip));
+        if (!code) continue;
+        const r = chip.getBoundingClientRect();
+        if (!r.width || !r.height) continue;
+        shiftChips.push(chip);
+        for (const c of cellsForRect(r, cells)) add(c.el, code);
+      }
+      info.shiftChips = shiftChips.length;
+      if (CONFIG.hideEventBars) shiftChips.forEach((c) => c.classList.add(HIDE_CLASS));
+    } else {
+      // iCal mode: badges only from the feed; event bars are not touched.
       const { method, dates } = dateCells(cells);
       info.dating = method;
       if (dates) {
@@ -407,30 +457,34 @@
 
   window.addEventListener('resize', schedule);
 
-  if (CONFIG.icsUrl) {
-    loadIcs(false);
-    setInterval(() => loadIcs(true), CONFIG.icsRefreshMinutes * 60e3);
-  }
+  loadIcs(false);
+  setInterval(() => loadIcs(true), CONFIG.icsRefreshMinutes * 60e3);
 
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand('Shift badges: diagnose', () => {
       render();
       const i = lastRun.info;
       const lines = [
+        `Mode: ${i.mode}`,
         `View detected: ${i.view}`,
         `Day cells: ${i.cells} in ${i.rows} rows`,
-        `Event bars found: ${i.chips}, shift events among them: ${i.shiftChips}`,
-        `Days with badges: ${i.badgedCells}`,
       ];
-      if (CONFIG.icsUrl) {
+      if (i.mode === 'iCal') {
         lines.push(`iCal: ${ics.events} events, ${ics.error ? 'error: ' + ics.error
           : 'last loaded ' + (ics.fetchedAt ? new Date(ics.fetchedAt).toLocaleString() : 'never')}`);
         lines.push(`Date mapping: ${i.dating}${i.firstDate ? ` (${i.firstDate} … ${i.lastDate})` : ''}`);
+      } else {
+        lines.push(`Event bars found: ${i.chips}, shift events among them: ${i.shiftChips}`);
       }
+      lines.push(`Days with badges: ${i.badgedCells}`);
       console.log('[shift-badges] diagnose', i);
       alert(lines.join('\n'));
     });
-    if (CONFIG.icsUrl) GM_registerMenuCommand('Shift badges: reload iCal now', () => loadIcs(true));
+    GM_registerMenuCommand('Shift badges: set iCal address', askForIcsUrl);
+    GM_registerMenuCommand('Shift badges: reload iCal now', () => {
+      if (!getIcsUrl()) { alert('No iCal address set.'); return; }
+      loadIcs(true);
+    });
   }
 
   schedule();

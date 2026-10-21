@@ -1,6 +1,6 @@
 # Google Calendar – Shift Badges
 
-A userscript for shift workers. It shows shift codes such as `D11`, `N11`, `DOV` or `PRC` as small colored badges in the top-right corner of each day in Google Calendar's **month view** – similar to the corner info in the aCalendar Android app – and hides the normal event bars for those events, so the day stays free for your real appointments.
+A userscript for shift workers. It shows shift codes such as `D11`, `N11`, `DOV` or `PRC` as small colored badges in the top-right corner of each day in Google Calendar's **month view** – similar to the corner info in the aCalendar Android app.
 
 ## Install
 
@@ -11,9 +11,20 @@ A userscript for shift workers. It shows shift codes such as `D11`, `N11`, `DOV`
 
 Put each shift into your calendar as an all-day event whose title is just the code (`D11`, `N11`, …). A dedicated calendar for shifts works best.
 
+## Two modes
+
+**Default mode** – no setup needed. The script reads the shift events from the event bars on the page, draws the badges and hides those bars. Google still reserves the space of the hidden bars, so other events on those days start one line lower.
+
+**iCal mode** – the badges come from your shift calendar's iCal feed, and the event bars are left completely alone. Whether the shift calendar also shows as normal events is up to you: tick or untick it in Google Calendar's left sidebar.
+
+1. Google Calendar → Settings → your shift calendar → *Integrate calendar* → copy the **Secret address in iCal format**.
+2. Tampermonkey menu (extension icon) → **Shift badges: set iCal address** → paste → OK.
+
+The address is stored by Tampermonkey, so script updates keep it. Leave the field empty to switch back to the default mode. The feed refreshes every 30 minutes, or right away via **Shift badges: reload iCal now**. The secret address gives read access to that calendar – don't share it.
+
 ## Settings
 
-All settings are in the `CONFIG` block at the top of the script (Tampermonkey dashboard → edit).
+The other settings are in the `CONFIG` block at the top of the script (Tampermonkey dashboard → edit).
 
 **Codes and colors** – `rules` decides which event titles become badges. A title matches only if the whole title fits the pattern; the first matching rule sets the color:
 
@@ -27,21 +38,15 @@ rules: [
 ],
 ```
 
-**Only one calendar** – set `calendarName` to your shift calendar's name if events from other calendars could have titles that look like shift codes.
+In iCal mode, titles that match no rule are still shown in grey (`icsShowUnmatched`).
 
-**iCal mode (cleaner look)** – by default the script reads the shift events from the page. Google still reserves the space of the hidden event bars, so other events on those days start one line lower. To avoid that:
+**Only one calendar (default mode)** – set `calendarName` to your shift calendar's name if events from other calendars could have titles that look like shift codes.
 
-1. Google Calendar → Settings → your shift calendar → *Integrate calendar* → copy the **Secret address in iCal format**.
-2. Paste it into `icsUrl`.
-3. Untick the shift calendar in the left sidebar.
-
-The badges are then drawn from that feed (refreshed every 30 minutes, or via the Tampermonkey menu → *Shift badges: reload iCal now*). The secret address gives read access to that calendar – don't share your edited copy of the script.
-
-> Note: when the script updates, Tampermonkey replaces the whole file, including your edited settings. Note your changes down, or switch off *Check for updates* for this script in Tampermonkey.
+> When the script updates, Tampermonkey replaces the whole file, including edits in `CONFIG`. Note your changes down, or switch off *Check for updates* for this script. The iCal address set via the menu is not affected.
 
 ## Troubleshooting
 
-Tampermonkey menu → **Shift badges: diagnose** shows what the script found on the page (view, day cells, shift events, iCal status). Please include that output when opening an issue.
+Tampermonkey menu → **Shift badges: diagnose** shows what the script found on the page (mode, view, day cells, shift events or iCal status). Please include that output when opening an issue.
 
 ## Limitations
 
