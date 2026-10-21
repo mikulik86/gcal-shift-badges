@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Google Calendar – Shift Badges
 // @namespace    gcal-shift-badges
-// @version      2.0.0
-// @description  Shows shift codes (D11, N11, DOV, PRC …) from your shift calendar's iCal feed as small colored badges in the top-right corner of each day in Google Calendar's month view, like aCalendar's corner info.
+// @version      2.1.0
+// @description  Shows the titles of your shift calendar's events (e.g. D11, Night, Vacation) as small colored badges in the top-right corner of each day in Google Calendar's month view, like aCalendar's corner info.
 // @author       mikulik86
 // @license      MIT
 // @homepageURL  https://github.com/mikulik86/gcal-shift-badges
@@ -22,8 +22,10 @@
 
 // Setup: Tampermonkey menu → "Shift badges: set iCal address" → paste your shift
 // calendar's "Secret address in iCal format" (Google Calendar → Settings → the
-// calendar → Integrate calendar). The address is stored by Tampermonkey, so
-// script updates keep it. The calendar's normal event bars are not touched:
+// calendar → Integrate calendar). Each event's title becomes a badge on its day;
+// short titles fit best. Pick colors (or hide titles) via the Tampermonkey menu
+// → "Shift badges: colors". Address and colors are stored by Tampermonkey, so
+// script updates keep them. The calendar's normal event bars are not touched:
 // tick or untick the calendar in the sidebar as you like.
 
 (function () {
@@ -31,19 +33,17 @@
 
   /* ======================= SETTINGS – edit here ======================= */
   const CONFIG = {
-    // Badge colors by event title. First match wins; a title matches only if
-    // the WHOLE title fits the pattern.
-    rules: [
+    // Starting colors for titles you haven't picked a color for in the
+    // "Shift badges: colors" panel. A title matches if the WHOLE title fits
+    // the pattern; first match wins. Colors picked in the panel always win.
+    startColors: [
       { match: /^D\d+$/, bg: '#039be5' }, // D11, D8, …   (Google "Peacock")
       { match: /^N\d+$/, bg: '#33b679' }, // N11, …       (Google "Sage")
       { match: /^DOV$/,  bg: '#e67c73' }, // DOV          (Google "Flamingo")
       { match: /^PRC$/,  bg: '#616161' }, // PRC          (Google "Graphite")
     ],
-    textColor: '#ffffff',
-
-    // Also show titles that match no rule, in this color (false = skip them).
-    showUnmatched: true,
-    unmatchedColor: '#757575',
+    // Color for any other title until you pick one.
+    otherColor: '#757575',
 
     // How often the feed is reloaded.
     refreshMinutes: 30,
@@ -58,21 +58,46 @@
 
   const WRAP_CLASS = 'gcsb-wrap';
   const BADGE_CLASS = 'gcsb-badge';
+  const PANEL_ID = 'gcsb-panel';
 
   const log = (...a) => { if (CONFIG.debug) console.log('[shift-badges]', ...a); };
   const lastRun = { info: {} };
 
   /* ----------------------------- styles ------------------------------ */
+  const P = `#${PANEL_ID}`;
   const css = `
     .${WRAP_CLASS} {
       position: absolute; top: ${CONFIG.offsetTop}px; right: ${CONFIG.offsetRight}px;
-      display: flex; gap: 2px; z-index: 3; pointer-events: none;
+      display: flex; gap: 2px; z-index: 3; pointer-events: none; max-width: calc(50% - 16px);
     }
     .${BADGE_CLASS} {
       font: 500 11px/16px "Google Sans", Roboto, Arial, sans-serif;
       letter-spacing: .2px; padding: 0 4px; border-radius: 4px;
-      color: ${CONFIG.textColor}; white-space: nowrap;
-    }`;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+    }
+    ${P} { position: fixed; top: 72px; right: 16px; z-index: 2147483000; width: 340px;
+      max-height: calc(100vh - 96px); overflow: auto; box-sizing: border-box; padding: 14px 16px 12px;
+      background: #fff; color: #1f1f1f; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.28);
+      font: 14px/1.4 "Google Sans", Roboto, Arial, sans-serif; text-align: left; }
+    ${P}.gcsb-dark { background: #2d2e30; color: #e3e3e3; }
+    ${P} * { box-sizing: border-box; }
+    ${P} .gcsb-head { display: flex; align-items: center; justify-content: space-between; }
+    ${P} .gcsb-title { font-size: 16px; font-weight: 500; }
+    ${P} .gcsb-x { border: 0; background: none; color: inherit; font-size: 22px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+    ${P} .gcsb-note { font-size: 12px; opacity: .75; margin: 4px 0 10px; }
+    ${P} .gcsb-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(128,128,128,.25); }
+    ${P} .gcsb-prev { flex: 1; min-width: 0; display: flex; }
+    ${P} .gcsb-prev .${BADGE_CLASS} { font-size: 12px; line-height: 18px; padding: 0 6px; max-width: 100%; }
+    ${P} .gcsb-row.gcsb-off .gcsb-prev { opacity: .35; text-decoration: line-through; }
+    ${P} .gcsb-count { font-size: 12px; opacity: .6; min-width: 30px; text-align: right; }
+    ${P} input[type=color] { width: 34px; height: 24px; border: 0; padding: 0; background: none; cursor: pointer; }
+    ${P} .gcsb-hidebox { display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; user-select: none; }
+    ${P} .gcsb-reset { border: 0; background: none; color: inherit; opacity: .6; cursor: pointer; font-size: 15px; padding: 0 2px; visibility: hidden; }
+    ${P} .gcsb-row.gcsb-custom .gcsb-reset { visibility: visible; }
+    ${P} .gcsb-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+    ${P} .gcsb-btn { border: 1px solid rgba(128,128,128,.5); background: none; color: inherit; border-radius: 16px;
+      padding: 6px 16px; cursor: pointer; font: inherit; font-size: 13px; }
+    ${P} .gcsb-btn.gcsb-primary { background: #1a73e8; border-color: #1a73e8; color: #fff; }`;
   if (typeof GM_addStyle === 'function') GM_addStyle(css);
   else { const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); }
 
@@ -86,12 +111,52 @@
     set: (k, v) => { if (typeof GM_setValue === 'function') GM_setValue(k, v); },
   };
 
-  function ruleFor(title) {
-    return CONFIG.rules.find((r) => r.match.test(title)) || null;
+  /* ------------------------------ colors ----------------------------- */
+  // Stored per exact title: { bg: '#rrggbb', hidden: true|false }.
+  const getColors = () => store.get('colors', {}) || {};
+
+  function startColor(title) {
+    const r = CONFIG.startColors.find((x) => x.match.test(title));
+    return r ? r.bg : CONFIG.otherColor;
+  }
+
+  // null = hidden, otherwise the background color for this title.
+  function colorFor(title, colors) {
+    const s = colors[title] || {};
+    if (s.hidden) return null;
+    return s.bg || startColor(title);
+  }
+
+  function setColor(title, patch) {
+    const all = getColors();
+    const next = { ...(all[title] || {}), ...patch };
+    if (!next.bg) delete next.bg;
+    if (!next.hidden) delete next.hidden;
+    if (Object.keys(next).length) all[title] = next; else delete all[title];
+    store.set('colors', all);
+  }
+
+  // Text color for a badge: white like Google's event chips, dark only on
+  // light backgrounds (yellow, pastels) where white would be hard to read.
+  function textOn(bg) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(bg || '');
+    if (!m) return '#ffffff';
+    const n = parseInt(m[1], 16);
+    const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+    const L = 0.2126 * lin(n >> 16) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+    return L > 0.45 ? '#202124' : '#ffffff';
+  }
+
+  // Any CSS color ("red", "rgb(…)", "#abc") → "#rrggbb", as the color picker needs.
+  function toHex(c) {
+    const x = document.createElement('canvas').getContext('2d');
+    x.fillStyle = '#757575';
+    x.fillStyle = c || '';
+    return /^#[0-9a-f]{6}$/i.test(x.fillStyle) ? x.fillStyle : '#757575';
   }
 
   function isOwnNode(n) {
-    return n && n.nodeType === 1 && (n.classList.contains(WRAP_CLASS) || n.classList.contains(BADGE_CLASS));
+    return n && n.nodeType === 1 && (n.classList.contains(WRAP_CLASS) || n.classList.contains(BADGE_CLASS) || n.id === PANEL_ID);
   }
 
   // Month shown according to the URL (…/r/month/2026/11/21), else today.
@@ -270,6 +335,7 @@
         applyIcsText(res.responseText, t);
         store.set('icsCache', { url, t, text: res.responseText });
         schedule();
+        if (panel) openPanel(); // refresh the colors list
       },
       onerror: () => { ics.loading = false; ics.error = 'network error'; schedule(); },
     });
@@ -293,25 +359,129 @@
     resetIcs();
     if (url) loadIcs(true);
     schedule();
+    if (panel) openPanel();
+  }
+
+  /* --------------------------- colors panel --------------------------- */
+  let panel = null;
+
+  function el(tag, props = {}, children = []) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') e.className = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else e[k] = v;
+    }
+    for (const c of [].concat(children)) if (c != null) e.append(c);
+    return e;
+  }
+
+  function pageIsDark() {
+    for (const n of [document.querySelector('[role="main"]'), document.body, document.documentElement]) {
+      const m = n && /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(getComputedStyle(n).backgroundColor);
+      if (m && (m[4] === undefined || +m[4] > 0.5)) return (+m[1] + +m[2] + +m[3]) / 3 < 110;
+    }
+    return false;
+  }
+
+  function closePanel() {
+    if (panel) panel.remove();
+    panel = null;
+    document.removeEventListener('keydown', onPanelKey, true);
+  }
+
+  function onPanelKey(e) { if (e.key === 'Escape') closePanel(); }
+
+  function titleCounts() {
+    const counts = new Map();
+    for (const titles of ics.byDate.values()) for (const t of titles) counts.set(t, (counts.get(t) || 0) + 1);
+    return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }
+
+  function colorRow(title, count) {
+    const colors = getColors();
+    const own = colors[title] || {};
+    const bg = own.bg || startColor(title);
+    const badge = el('span', { class: BADGE_CLASS, textContent: title, title });
+    const paint = (c) => { badge.style.background = c; badge.style.color = textOn(toHex(c)); };
+    paint(bg);
+    const row = el('div', { class: 'gcsb-row' });
+    const sync = () => {
+      const s = getColors()[title] || {};
+      row.classList.toggle('gcsb-off', !!s.hidden);
+      row.classList.toggle('gcsb-custom', !!s.bg);
+    };
+    const picker = el('input', {
+      type: 'color', value: toHex(bg), title: 'Badge color',
+      oninput: () => { paint(picker.value); setColor(title, { bg: picker.value }); sync(); schedule(); },
+    });
+    const hide = el('input', {
+      type: 'checkbox', checked: !!own.hidden,
+      onchange: () => { setColor(title, { hidden: hide.checked }); sync(); schedule(); },
+    });
+    const reset = el('button', {
+      class: 'gcsb-reset', type: 'button', textContent: '↺', title: 'Back to the starting color',
+      onclick: () => { setColor(title, { bg: undefined }); const c = startColor(title); paint(c); picker.value = toHex(c); sync(); schedule(); },
+    });
+    row.append(
+      el('div', { class: 'gcsb-prev' }, badge),
+      el('span', { class: 'gcsb-count', textContent: `${count}×`, title: `${count} day(s) in the feed` }),
+      picker,
+      el('label', { class: 'gcsb-hidebox' }, [hide, 'Hide']),
+      reset,
+    );
+    sync();
+    return row;
+  }
+
+  function openPanel() {
+    const wasOpen = panel;
+    if (wasOpen) panel.replaceChildren(); else panel = el('div', { id: PANEL_ID });
+    panel.classList.toggle('gcsb-dark', pageIsDark());
+    panel.append(el('div', { class: 'gcsb-head' }, [
+      el('span', { class: 'gcsb-title', textContent: 'Badge colors' }),
+      el('button', { class: 'gcsb-x', type: 'button', textContent: '×', title: 'Close', onclick: closePanel }),
+    ]));
+    const foot = el('div', { class: 'gcsb-foot' });
+    if (!getIcsUrl()) {
+      panel.append(el('p', { class: 'gcsb-note', textContent: 'Set your shift calendar\'s iCal address first. Its event titles will then be listed here.' }));
+      foot.append(el('button', { class: 'gcsb-btn gcsb-primary', type: 'button', textContent: 'Set iCal address', onclick: askForIcsUrl }));
+    } else {
+      const list = titleCounts();
+      panel.append(el('p', {
+        class: 'gcsb-note',
+        textContent: list.length
+          ? 'Every title in your shift calendar. Changes are saved right away.'
+          : (ics.error ? `The feed could not be loaded (${ics.error}).` : 'Loading the feed …'),
+      }));
+      for (const [title, count] of list) panel.append(colorRow(title, count));
+    }
+    foot.append(el('button', { class: 'gcsb-btn', type: 'button', textContent: 'Done', onclick: closePanel }));
+    panel.append(foot);
+    if (!wasOpen) {
+      document.body.appendChild(panel);
+      document.addEventListener('keydown', onPanelKey, true);
+    }
   }
 
   /* ----------------------------- render ------------------------------ */
-  function setBadges(cellEl, titles) {
+  // badges: [{ title, bg }]
+  function setBadges(cellEl, badges) {
     let wrap = null;
     for (const ch of cellEl.children) if (ch.classList.contains(WRAP_CLASS)) { wrap = ch; break; }
-    const sig = titles.join('|');
-    if (!titles.length) { if (wrap) wrap.remove(); return; }
+    const sig = badges.map((b) => `${b.title}\u0000${b.bg}`).join('|');
+    if (!badges.length) { if (wrap) wrap.remove(); return; }
     if (wrap && wrap.dataset.sig === sig) return;
     if (getComputedStyle(cellEl).position === 'static') cellEl.style.position = 'relative';
     if (!wrap) { wrap = document.createElement('div'); wrap.className = WRAP_CLASS; cellEl.appendChild(wrap); }
     wrap.dataset.sig = sig;
-    wrap.replaceChildren(...titles.map((title) => {
+    wrap.replaceChildren(...badges.map(({ title, bg }) => {
       const b = document.createElement('span');
       b.className = BADGE_CLASS;
       b.textContent = title;
-      const rule = ruleFor(title);
-      b.style.background = rule ? rule.bg : CONFIG.unmatchedColor;
-      if (rule && rule.fg) b.style.color = rule.fg;
+      b.title = title;
+      b.style.background = bg;
+      b.style.color = textOn(toHex(bg));
       return b;
     }));
   }
@@ -339,13 +509,15 @@
     info.firstDate = ymd(dates[0]);
     info.lastDate = ymd(dates[dates.length - 1]);
 
+    const colors = getColors();
     cells.forEach((c, i) => {
-      const titles = [];
-      for (const t of ics.byDate.get(ymd(dates[i])) || []) {
-        if ((ruleFor(t) || CONFIG.showUnmatched) && !titles.includes(t)) titles.push(t);
+      const badges = [];
+      for (const title of ics.byDate.get(ymd(dates[i])) || []) {
+        const bg = colorFor(title, colors);
+        if (bg && !badges.some((b) => b.title === title)) badges.push({ title, bg });
       }
-      setBadges(c.el, titles);
-      if (titles.length) info.badgedCells++;
+      setBadges(c.el, badges);
+      if (badges.length) info.badgedCells++;
     });
     log(info);
   }
@@ -361,7 +533,8 @@
 
   new MutationObserver((muts) => {
     for (const m of muts) {
-      if (isOwnNode(m.target) || (m.target.parentElement && m.target.parentElement.closest('.' + WRAP_CLASS))) continue;
+      const t = m.target.nodeType === 1 ? m.target : m.target.parentElement;
+      if (t && (isOwnNode(t) || t.closest(`.${WRAP_CLASS}, #${PANEL_ID}`))) continue;
       const nodes = [...m.addedNodes, ...m.removedNodes];
       if (nodes.length && nodes.every(isOwnNode)) continue;
       schedule();
@@ -376,6 +549,7 @@
 
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand('Shift badges: set iCal address', askForIcsUrl);
+    GM_registerMenuCommand('Shift badges: colors', openPanel);
     GM_registerMenuCommand('Shift badges: reload now', () => {
       if (!getIcsUrl()) { askForIcsUrl(); return; }
       loadIcs(true);
