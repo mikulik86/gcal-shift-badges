@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="410" viewBox="0 0 1200 410" font-family="Roboto, 'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif"><rect width="1200" height="410" fill="#f1f3f4"/>
+<rect x="36" y="30" width="360" height="350" rx="16" fill="#ffffff" stroke="#dadce0"/>
+<circle cx="76" cy="70" r="16" fill="#1a73e8"/>
+<text x="76" y="76" font-size="16" font-weight="600" fill="#fff" text-anchor="middle">1</text>
+<text x="104" y="76" font-size="17" font-weight="600" fill="#1f1f1f">Copy the secret iCal address</text>
+<text x="216" y="336" font-size="13" font-weight="400" fill="#5f6368" text-anchor="middle">Google Calendar → Settings →</text>
+<text x="216" y="356" font-size="13" font-weight="400" fill="#5f6368" text-anchor="middle">your shift calendar → Integrate calendar</text>
+<path d="M404 195 l10 10 l-10 10" fill="none" stroke="#9aa0a6" stroke-width="2.4"/>
+<rect x="420" y="30" width="360" height="350" rx="16" fill="#ffffff" stroke="#dadce0"/>
+<circle cx="460" cy="70" r="16" fill="#1a73e8"/>
+<text x="460" y="76" font-size="16" font-weight="600" fill="#fff" text-anchor="middle">2</text>
+<text x="488" y="76" font-size="17" font-weight="600" fill="#1f1f1f">Paste it in the script menu</text>
+<text x="600" y="336" font-size="13" font-weight="400" fill="#5f6368" text-anchor="middle">Tampermonkey icon →</text>
+<text x="600" y="356" font-size="13" font-weight="400" fill="#5f6368" text-anchor="middle">“Shift badges: set iCal address”</text>
+<path d="M788 195 l10 10 l-10 10" fill="none" stroke="#9aa0a6" stroke-width="2.4"/>
+<rect x="804" y="30" width="360" height="350" rx="16" fill="#ffffff" stroke="#dadce0"/>
+<circle cx="844" cy="70" r="16" fill="#1a73e8"/>
+<text x="844" y="76" font-size="16" font-weight="600" fill="#fff" text-anchor="middle">3</text>
+<text x="872" y="76" font-size="17" font-weight="600" fill="#1f1f1f">Badges appear in month view</text>
+<text x="984" y="336" font-size="13" font-weight="400" fill="#5f6368" text-anchor="middle">Updates with the feed every 30 min</text>
+<text x="984" y="356" font-size="13" font-weight="400" fill="#5f6368" text-anchor="middle">or via “Shift badges: reload now”</text>
+<rect x="60" y="100" width="312" height="190" rx="10" fill="#f8fafd" stroke="#e0e3e7"/>
+<text x="78" y="132" font-size="15" font-weight="600" fill="#1f1f1f">Integrate calendar</text>
+<text x="78" y="162" font-size="12" font-weight="400" fill="#5f6368">Calendar ID</text>
+<rect x="78" y="170" width="276" height="28" rx="4" fill="#ffffff" stroke="#dadce0"/>
+<text x="88" y="189" font-size="12" font-weight="400" fill="#9aa0a6">…@group.calendar.google.com</text>
+<text x="78" y="224" font-size="12" font-weight="600" fill="#1a73e8">Secret address in iCal format</text>
+<rect x="78" y="232" width="276" height="30" rx="4" fill="#ffffff" stroke="#1a73e8" stroke-width="2"/>
+<text x="88" y="252" font-size="11.5" font-weight="400" fill="#3c4043">https://calendar.google.com/calendar/…</text>
+<rect x="326" y="239" width="11" height="13" rx="2" fill="none" stroke="#5f6368" stroke-width="1.5"/>
+<rect x="330" y="243" width="11" height="13" rx="2" fill="#fff" stroke="#5f6368" stroke-width="1.5"/>
+<rect x="444" y="100" width="312" height="190" rx="10" fill="#ffffff" stroke="#dadce0"/>
+<text x="462" y="130" font-size="13" font-weight="600" fill="#3c4043">Google Calendar – Shift Badges</text>
+<line x1="444" y1="144" x2="756" y2="144" stroke="#e0e3e7"/>
+<rect x="452" y="152" width="296" height="36" rx="6" fill="#e8f0fe"/>
+<circle cx="470" cy="170" r="4" fill="#1a73e8"/>
+<text x="484" y="175" font-size="13.5" font-weight="600" fill="#174ea6">Shift badges: set iCal address</text>
+<circle cx="470" cy="212" r="4" fill="#9aa0a6"/>
+<text x="484" y="217" font-size="13.5" font-weight="400" fill="#3c4043">Shift badges: reload now</text>
+<circle cx="470" cy="254" r="4" fill="#9aa0a6"/>
+<text x="484" y="259" font-size="13.5" font-weight="400" fill="#3c4043">Shift badges: diagnose</text>
+<rect x="828" y="100" width="312" height="190" rx="10" fill="#ffffff" stroke="#dadce0"/>
+<line x1="828" y1="130" x2="1140" y2="130" stroke="#dadce0"/>
+<text x="880" y="120" font-size="11" font-weight="500" fill="#70757a" text-anchor="middle" letter-spacing="0.8">MON</text>
+<text x="880" y="152" font-size="13" font-weight="500" fill="#3c4043" text-anchor="middle">23</text>
+<rect x="900.7" y="135" width="26.3" height="16.8" rx="4.2" fill="#039be5"/>
+<text x="913.8" y="147.6" font-size="11.6" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
+<line x1="932" y1="100" x2="932" y2="290" stroke="#dadce0"/>
+<text x="984" y="120" font-size="11" font-weight="500" fill="#70757a" text-anchor="middle" letter-spacing="0.8">TUE</text>
+<text x="984" y="152" font-size="13" font-weight="500" fill="#3c4043" text-anchor="middle">24</text>
+<rect x="1004.7" y="135" width="26.3" height="16.8" rx="4.2" fill="#039be5"/>
+<text x="1017.8" y="147.6" font-size="11.6" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
+<line x1="1036" y1="100" x2="1036" y2="290" stroke="#dadce0"/>
+<text x="1088" y="120" font-size="11" font-weight="500" fill="#70757a" text-anchor="middle" letter-spacing="0.8">WED</text>
+<text x="1088" y="152" font-size="13" font-weight="500" fill="#3c4043" text-anchor="middle">25</text>
+<rect x="1108.3" y="135" width="26.7" height="16.8" rx="4.2" fill="#33b679"/>
+<text x="1121.6" y="147.6" font-size="11.6" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">N11</text>
+<circle cx="944" cy="178" r="4" fill="#7986cb"/>
+<text x="952" y="182" font-size="12" font-weight="400" fill="#3c4043">7pm Gym</text>
+<rect x="1039" y="169" width="98" height="18" rx="4" fill="#0b8043"/>
+<text x="1045" y="182" font-size="12" font-weight="500" fill="#fff">School trip</text>
+</svg>
