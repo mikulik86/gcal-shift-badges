@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="744" viewBox="0 0 800 744" font-family="Roboto, 'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif"><defs><filter id="sh" x="-10%" y="-10%" width="120%" height="125%"><feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000" flood-opacity="0.2"/>
+</filter></defs><rect width="800" height="744" fill="#f1f3f4"/>
+<g transform="translate(114 30) scale(1.3)"><rect width="440" height="526" rx="12" fill="#ffffff" filter="url(#sh)"/>
+<text x="16" y="32" font-size="16" font-weight="500" fill="#1f1f1f">Shift badges</text>
+<path d="M412 21 l10 10 M422 21 l-10 10" stroke="#444746" stroke-width="1.8"/>
+<text x="26" y="66" font-size="13" font-weight="500" fill="#1f1f1f">Right corner</text>
+<text x="128" y="66" font-size="13" font-weight="400" fill="#5f6368">Left corner</text>
+<line x1="16" y1="77" x2="424" y2="77" stroke="#e0e3e7"/>
+<rect x="16" y="75" width="96" height="3" rx="1.5" fill="#1a73e8"/>
+<text x="16" y="100" font-size="12" font-weight="400" fill="#5f6368">iCal address – the calendar’s “Secret address in iCal format”</text>
+<rect x="16" y="108" width="408" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="24" y="126.5" font-size="12.5" font-weight="400" fill="#1f1f1f">https://calendar.google.com/calendar/ical/x/private-y/basic.ics</text>
+<text x="16" y="154" font-size="12" font-weight="400" fill="#5f6368">56 events loaded (21:44)</text>
+<text x="16" y="184" font-size="14" font-weight="500" fill="#1f1f1f">Rules</text>
+<text x="16" y="202" font-size="12" font-weight="400" fill="#5f6368">Every event gets a badge. Rules change the ones they match.</text>
+<line x1="16" y1="214" x2="424" y2="214" stroke="#e3e3e3"/>
+<rect x="16" y="222" width="168" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="24" y="240.5" font-size="12.5" font-weight="400" fill="#1f1f1f">/^Day shift (\d+)$/</text>
+<rect x="190" y="222" width="112" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="198" y="240.5" font-size="12.5" font-weight="400" fill="#1f1f1f">D$1</text>
+<rect x="310" y="225" width="32" height="22" rx="3" fill="#039be5" stroke="#bdc1c6"/>
+<rect x="350.5" y="229.5" width="13" height="13" rx="2.5" fill="#fff" stroke="#80868b"/>
+<text x="368" y="240.5" font-size="12" font-weight="400" fill="#3c4043">Hide</text>
+<path d="M410 231 l9 9 M419 231 l-9 9" stroke="#80868b" stroke-width="1.6"/>
+<rect x="16" y="258" width="25.1" height="16" rx="4" fill="#039be5"/>
+<text x="28.5" y="270" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle">D11</text>
+<text x="49.1" y="270" font-size="12" font-weight="400" fill="#3c4043">Day shift 11, Day shift 8</text>
+<line x1="16" y1="278" x2="424" y2="278" stroke="#e3e3e3"/>
+<rect x="16" y="286" width="168" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="24" y="304.5" font-size="12.5" font-weight="400" fill="#1f1f1f">Night shift</text>
+<rect x="190" y="286" width="112" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="198" y="304.5" font-size="12.5" font-weight="400" fill="#1f1f1f">N</text>
+<rect x="310" y="289" width="32" height="22" rx="3" fill="#33b679" stroke="#bdc1c6"/>
+<rect x="350.5" y="293.5" width="13" height="13" rx="2.5" fill="#fff" stroke="#80868b"/>
+<text x="368" y="304.5" font-size="12" font-weight="400" fill="#3c4043">Hide</text>
+<path d="M410 295 l9 9 M419 295 l-9 9" stroke="#80868b" stroke-width="1.6"/>
+<rect x="16" y="322" width="16.3" height="16" rx="4" fill="#33b679"/>
+<text x="24.2" y="334" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle">N</text>
+<text x="40.3" y="334" font-size="12" font-weight="400" fill="#3c4043">Night shift</text>
+<line x1="16" y1="342" x2="424" y2="342" stroke="#e3e3e3"/>
+<rect x="16" y="350" width="168" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="24" y="368.5" font-size="12.5" font-weight="400" fill="#1f1f1f">dovolena</text>
+<rect x="190" y="350" width="112" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="198" y="368.5" font-size="12.5" font-weight="400" fill="#1f1f1f">VAC</text>
+<rect x="310" y="353" width="32" height="22" rx="3" fill="#e67c73" stroke="#bdc1c6"/>
+<rect x="350.5" y="357.5" width="13" height="13" rx="2.5" fill="#fff" stroke="#80868b"/>
+<text x="368" y="368.5" font-size="12" font-weight="400" fill="#3c4043">Hide</text>
+<path d="M410 359 l9 9 M419 359 l-9 9" stroke="#80868b" stroke-width="1.6"/>
+<rect x="16" y="386" width="30.5" height="16" rx="4" fill="#e67c73"/>
+<text x="31.2" y="398" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle">VAC</text>
+<text x="54.5" y="398" font-size="12" font-weight="400" fill="#3c4043">Dovolená</text>
+<line x1="16" y1="406" x2="424" y2="406" stroke="#e3e3e3"/>
+<rect x="16" y="414" width="168" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="24" y="432.5" font-size="12.5" font-weight="400" fill="#1f1f1f">/standby|on call/i</text>
+<rect x="190" y="414" width="112" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
+<text x="198" y="432.5" font-size="12.5" font-weight="400" fill="#9aa0a6">Show as</text>
+<rect x="310" y="417" width="32" height="22" rx="3" fill="#757575" stroke="#bdc1c6"/>
+<rect x="350" y="421" width="14" height="14" rx="3" fill="#1a73e8"/>
+<path d="M353 428 l3 3 l5 -6" fill="none" stroke="#fff" stroke-width="1.8"/>
+<text x="368" y="432.5" font-size="12" font-weight="400" fill="#3c4043">Hide</text>
+<path d="M410 423 l9 9 M419 423 l-9 9" stroke="#80868b" stroke-width="1.6"/>
+<rect x="16" y="450" width="43.6" height="16" rx="4" fill="none" stroke="#9aa0a6" stroke-dasharray="3 2"/>
+<text x="37.8" y="462" font-size="11" font-weight="400" fill="#5f6368" text-anchor="middle">hidden</text>
+<text x="67.6" y="462" font-size="12" font-weight="400" fill="#3c4043">Standby, On call</text>
+<line x1="16" y1="470" x2="424" y2="470" stroke="#e3e3e3"/>
+<rect x="16" y="482" width="100" height="30" rx="15" fill="#fff" stroke="#c4c7c5"/>
+<text x="66" y="501.5" font-size="13" font-weight="500" fill="#3c4043" text-anchor="middle">+ Add rule</text>
+<rect x="348" y="482" width="76" height="30" rx="15" fill="#1a73e8"/>
+<text x="386" y="501.5" font-size="13" font-weight="500" fill="#ffffff" text-anchor="middle">Done</text>
+</g></svg>

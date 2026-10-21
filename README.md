@@ -1,10 +1,10 @@
 # Google Calendar – Shift Badges
 
-A userscript for shift workers. It shows the title of each event in your shift calendar – for example `D11`, `Night` or `Vacation` – as a small colored badge in the top-right corner of the day in Google Calendar's **month view**, similar to the corner info in the aCalendar Android app.
+A userscript for shift workers. It shows the events of up to two Google calendars as small colored badges in the top corners of each day in Google Calendar's **month view** – for example your shifts on the right and your partner's on the left – similar to the corner info in the aCalendar Android app.
 
-![Month view with shift badges in the corner of each day](images/month-view.svg)
+![Month view with shift badges in both top corners of each day](images/month-view.svg)
 
-The badges come from your shift calendar's iCal feed. The calendar's normal event bars are not touched: tick or untick the shift calendar in Google Calendar's left sidebar, whichever you prefer.
+The badges come from the calendars' iCal feeds. Their normal event bars are not touched: tick or untick the calendars in Google Calendar's left sidebar, whichever you prefer.
 
 ## Install
 
@@ -14,33 +14,41 @@ The badges come from your shift calendar's iCal feed. The calendar's normal even
 
 ## Set up
 
-1. Put each shift into a dedicated Google calendar as an all-day event. Its title is what the badge shows – any text works, short titles fit best.
-2. Google Calendar → Settings → that calendar → *Integrate calendar* → copy the **Secret address in iCal format**.
-3. Open Google Calendar in month view, click the Tampermonkey icon → **Shift badges: set iCal address** → paste → OK.
+1. Google Calendar → Settings → your shift calendar → *Integrate calendar* → copy the **Secret address in iCal format**.
+2. Open Google Calendar in month view, click the Tampermonkey icon → **Shift badges: settings**.
+3. On the **Right corner** tab, paste the address. Every event of that calendar now shows as a badge with its title.
+4. Optional: put a second calendar on the **Left corner** tab.
 
 ![Setup in three steps](images/setup.svg)
 
-To remove the badges, set an empty address. The secret address gives read access to that calendar – don't share it.
+The secret address gives read access to that calendar – don't share it. To remove a corner, clear its address.
 
-Edit your shifts as usual (in the web calendar or any app synced with it). The script reloads the feed every 30 minutes, or right away via **Shift badges: reload now**. Google can take a while to publish changes in the iCal feed.
+Edit your events as usual (in the web calendar or any app synced with it). The script reloads the feeds every 30 minutes, or right away via **Shift badges: reload now**. Google can take a while to publish changes in the iCal feed.
 
-## Colors
+## Rules
 
-Tampermonkey icon → **Shift badges: colors** lists every title from your shift calendar with how often it occurs. Pick a color, tick **Hide** to leave a title out, or use ↺ to go back to the starting color. Changes show on the calendar right away.
+Each corner has its own rules. A rule changes the badges whose title it matches:
 
-![The Badge colors panel](images/colors-panel.svg)
+- **Pattern** – plain text matches the whole title, ignoring case and accents (`dovolena` matches "Dovolená"). Write `/…/` for a regular expression, e.g. `/^D\d+$/` for D11, D8 …; add `i` after the closing slash to ignore case.
+- **Show as** – optional text shown instead of the title, so long titles can become short badges ("Night shift" → `N`). With a regex, `$1` inserts the first group: `/^Day shift (\d+)$/` shown as `D$1` turns "Day shift 11" into `D11`.
+- **Color** – the badge color. The text turns dark on light colors automatically.
+- **Hide** – no badge for matching events, e.g. `/standby|on call/i`.
 
-Until you pick a color, titles are grey, except for the starting colors in the `CONFIG` block at the top of the script (`startColors`, e.g. D11 blue, N11 green). The badge text turns dark on light colors automatically.
+Events no rule matches show their title in grey. If several rules match, plain text wins over regex; otherwise the upper rule wins. Under each rule the panel shows which titles from the feed it takes, and an error if the regex is invalid. Sites like [regex101.com](https://regex101.com) help to build and test patterns.
 
-The iCal address and your colors are stored by Tampermonkey, so script updates keep them. They are stored per browser; on another computer set them again or use Tampermonkey's sync. Edits in `CONFIG` itself are replaced when the script updates.
+![The settings panel](images/settings-panel.svg)
+
+Addresses and rules are stored by Tampermonkey, so script updates keep them. They are stored per browser; on another computer set them up again or use Tampermonkey's sync.
 
 ## Troubleshooting
 
-Tampermonkey menu → **Shift badges: diagnose** shows whether an address is set, the feed status, and what the script found on the page. Please include that output when opening an issue.
+Tampermonkey menu → **Shift badges: diagnose** shows the feed status of both corners and what the script found on the page (without the secret addresses). Please include that output when opening an issue.
 
 ## Limitations
 
 - Month view in a desktop browser only; the Google Calendar mobile apps are not affected.
+- Each corner gets at most half the day width minus the day number; in narrow windows badges are cut off with "…".
+- Only Google Calendar iCal addresses are supported.
 - Google Calendar's page structure is undocumented and changes from time to time, which can break the script until it is adjusted.
 - Recurring events (`RRULE`) in the feed are not expanded; one event per shift works fine.
 
