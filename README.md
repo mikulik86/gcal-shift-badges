@@ -4,7 +4,7 @@ A userscript for shift workers. It shows the events of up to two Google calendar
 
 ![Month view with shift badges in both top corners of each day](images/month-view.svg)
 
-The badges come from the calendars' iCal feeds. Their normal event bars are not touched: tick or untick the calendars in Google Calendar's left sidebar, whichever you prefer. Recurring events work too, including single occurrences you moved, renamed or deleted.
+The badges come from the calendars' iCal feeds. Their normal event bars are not touched: tick or untick the calendars in Google Calendar's left sidebar, whichever you prefer. Recurring events work too, including single occurrences you moved, renamed or deleted. Badges of events that are over fade the same way Google fades past event bars.
 
 ## Install
 

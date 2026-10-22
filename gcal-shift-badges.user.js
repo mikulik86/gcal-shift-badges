@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Calendar – Shift Badges
 // @namespace    gcal-shift-badges
-// @version      3.1.0
+// @version      3.2.0
 // @description  Shows the events of up to two Google calendars as small colored badges in the top corners of each day in Google Calendar's month view (e.g. shifts on the right, vacation on the left), like aCalendar's corner info.
 // @author       mikulik86
 // @license      MIT
@@ -39,6 +39,7 @@
     refreshMinutes: 30,       // how often the feeds are reloaded
     offsetTop: 4,             // badge distance from the top of the day (px)
     offsetSide: 4,            // … and from its left/right edge (px)
+    dimPast: true,            // fade badges of events that are over, like Google does
     debug: false,
   };
   /* ==================================================================== */
@@ -122,13 +123,28 @@
 
   // Text color for a badge: white like Google's event chips, dark only on
   // light backgrounds (yellow, pastels) where white would be hard to read.
-  function textOn(bg) {
-    const m = /^#?([0-9a-f]{6})$/i.exec(bg || '');
-    if (!m) return '#ffffff';
-    const n = parseInt(m[1], 16);
+  const rgbOf = (hex) => { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const hexOf = (rgb) => '#' + rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+  function luminance(rgb) {
     const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
-    const L = 0.2126 * lin(n >> 16) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
-    return L > 0.45 ? '#202124' : '#ffffff';
+    return 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
+  }
+
+  function textOn(bg) {
+    if (!/^#[0-9a-f]{6}$/i.test(bg || '')) return '#ffffff';
+    return luminance(rgbOf(bg)) > 0.45 ? '#202124' : '#ffffff';
+  }
+
+  // Events that are over, drawn like Google Calendar draws them (measured on
+  // its dark theme): the color mixed half with the surface, and light or dark
+  // text, whichever reads better, at 38 % strength.
+  function pastColors(bg, dark) {
+    const surface = dark ? [32, 33, 36] : [255, 255, 255];
+    const b = rgbOf(bg).map((v, i) => (v + surface[i]) / 2);
+    const contrast = (t) => { const a = luminance(b) + 0.05, c = luminance(t) + 0.05; return Math.max(a, c) / Math.min(a, c); };
+    const light = [227, 227, 227], darkText = [31, 31, 31];
+    const t = contrast(light) >= contrast(darkText) ? light : darkText;
+    return { bg: hexOf(b), fg: hexOf(b.map((v, i) => v + 0.38 * (t[i] - v))) };
   }
 
   // Any CSS color ("red", "rgb(…)", "#abc") → "#rrggbb", as the color picker needs.
@@ -514,7 +530,17 @@
     }
   }
 
-  // Titles of the recurring events per day (YYYY-MM-DD), for day numbers lo…hi.
+  // Local midnight at the start of day number dn, in ms.
+  const midnight = (dn) => { const w = fromDn(dn); return new Date(w.y, w.mo, w.d).getTime(); };
+
+  // ISO duration ("PT12H", "P1D") → ms.
+  function durationMs(s) {
+    const m = /^P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/.exec(s || '');
+    if (!m) return 0;
+    return ((+m[1] || 0) * 7 * 24 * 3600 + (+m[2] || 0) * 24 * 3600 + (+m[3] || 0) * 3600 + (+m[4] || 0) * 60 + (+m[5] || 0)) * 1000;
+  }
+
+  // Recurring events per day (YYYY-MM-DD) as { title, end }, for day numbers lo…hi.
   function seriesDays(f, lo, hi) {
     const key = `${lo}:${hi}`;
     if (f.ranges.has(key)) return f.ranges.get(key);
@@ -523,11 +549,12 @@
       const put = (date) => {
         if (sr.ex.has(ymd(date))) return;
         const d0 = dnLocal(date);
+        const end = sr.tm ? date.getTime() + sr.durMs : midnight(d0 + sr.days);
         for (let i = 0; i < sr.days; i++) {
           if (d0 + i < lo || d0 + i > hi) continue;
           const k = ymdDn(d0 + i);
           if (!map.has(k)) map.set(k, []);
-          map.get(k).push(sr.summary);
+          map.get(k).push({ title: sr.summary, end });
         }
       };
       expandSeries(sr, lo - sr.days, hi, put);
@@ -538,8 +565,8 @@
     return map;
   }
 
-  // Titles on one day: one-off events first, then recurring ones.
-  const titlesOn = (f, day, rec) => [...(f.singles.get(day) || []), ...(rec.get(day) || [])];
+  // Events ({ title, end }) on one day: one-off events first, then recurring ones.
+  const eventsOn = (f, day, rec) => [...(f.singles.get(day) || []), ...(rec.get(day) || [])];
 
   function parseIcs(text) {
     const lines = text.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '').split(/\r?\n/);
@@ -589,12 +616,15 @@
     for (const e of events) if (e.rule && !e.rid && e.uid) masters.set(e.uid, e);
     const singles = new Map(), series = [];
     let count = 0;
+    // Duration of a timed event (ms); all-day events end at midnight after their last day.
+    const timedMs = (e) => Math.max(0, e.end ? e.end.date - e.start.date : durationMs(e.duration));
     const addSingle = (e) => {
       const d0 = dnLocal(e.start.date);
+      const end = e.start.allDay ? midnight(d0 + length(e)) : e.start.date.getTime() + timedMs(e);
       for (let i = 0; i < length(e); i++) {
         const k = ymdDn(d0 + i);
         if (!singles.has(k)) singles.set(k, []);
-        singles.get(k).push(e.summary);
+        singles.get(k).push({ title: e.summary, end });
       }
     };
     for (const e of events) {
@@ -609,6 +639,7 @@
       if (!e.rule) { addSingle(e); continue; }
       series.push({
         summary: e.summary, rule: e.rule, tm: e.start.tm, days: length(e), rdates: e.rdates, exList: e.ex,
+        durMs: e.start.allDay ? 0 : timedMs(e),
         s: { y: e.start.y, mo: e.start.mo, d: e.start.d, dn: dnOf(e.start.y, e.start.mo, e.start.d) },
       });
     }
@@ -665,34 +696,35 @@
     const f = feed(url), counts = new Map();
     const today = dnLocal(new Date());
     for (const m of [f.singles, seriesDays(f, today - 366, today + 366)]) {
-      for (const list of m.values()) for (const t of list) counts.set(t, (counts.get(t) || 0) + 1);
+      for (const list of m.values()) for (const { title: t } of list) counts.set(t, (counts.get(t) || 0) + 1);
     }
     for (const sr of f.series) if (!counts.has(sr.summary)) counts.set(sr.summary, 1);
     return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([t]) => t);
   }
 
   /* ----------------------------- render ------------------------------ */
-  function badgeEl(text, bg) {
+  // past: false, or the faded { bg, fg } from pastColors()
+  function badgeEl(text, bg, past) {
     const b = document.createElement('span');
-    b.className = BADGE_CLASS;
+    b.className = BADGE_CLASS + (past ? ' gcsb-past' : '');
     b.textContent = text;
     b.title = text;
-    b.style.background = bg;
-    b.style.color = textOn(toHex(bg));
+    b.style.background = past ? past.bg : bg;
+    b.style.color = past ? past.fg : textOn(toHex(bg));
     return b;
   }
 
-  // badges: [{ text, bg }]
+  // badges: [{ text, bg, past }]
   function setBadges(cellEl, side, badges) {
     let wrap = null;
     for (const ch of cellEl.children) if (ch.classList.contains(WRAP_CLASS) && ch.classList.contains(`gcsb-${side}`)) { wrap = ch; break; }
     if (!badges.length) { if (wrap) wrap.remove(); return; }
-    const sig = badges.map((b) => `${b.text}\u0000${b.bg}`).join('|');
+    const sig = badges.map((b) => `${b.text}\u0000${b.bg}\u0000${b.past ? b.past.bg + b.past.fg : ''}`).join('|');
     if (wrap && wrap.dataset.sig === sig) return;
     if (getComputedStyle(cellEl).position === 'static') cellEl.style.position = 'relative';
     if (!wrap) { wrap = document.createElement('div'); wrap.className = `${WRAP_CLASS} gcsb-${side}`; cellEl.appendChild(wrap); }
     wrap.dataset.sig = sig;
-    wrap.replaceChildren(...badges.map((b) => badgeEl(b.text, b.bg)));
+    wrap.replaceChildren(...badges.map((b) => badgeEl(b.text, b.bg, b.past)));
   }
 
   function clearAll(root) {
@@ -719,7 +751,7 @@
     info.lastDate = ymd(dates[dates.length - 1]);
 
     // recurring events, expanded for the days on screen
-    const lo = dnLocal(dates[0]), hi = dnLocal(dates[dates.length - 1]);
+    const lo = dnLocal(dates[0]), hi = dnLocal(dates[dates.length - 1]), now = Date.now(), dark = pageIsDark();
     const rec = {};
     for (const side of SIDES) if (settings[side].url) rec[side] = seriesDays(feed(settings[side].url), lo, hi);
 
@@ -729,11 +761,16 @@
         const url = settings[side].url;
         const list = [];
         if (url) {
-          for (const title of titlesOn(feed(url), day, rec[side])) {
-            const b = badgeFor(side, title);
-            if (b && !list.some((x) => x.text === b.text && x.bg === b.bg)) list.push(b);
+          for (const ev of eventsOn(feed(url), day, rec[side])) {
+            const b = badgeFor(side, ev.title);
+            if (!b) continue;
+            const over = CONFIG.dimPast && ev.end <= now; // faded once the event is over, like Google's bars
+            const same = list.find((x) => x.text === b.text && x.bg === b.bg);
+            if (same) same.over = same.over && over;
+            else list.push({ ...b, over });
           }
         }
+        for (const b of list) b.past = b.over && pastColors(toHex(b.bg), dark);
         setBadges(c.el, side, list);
         if (list.length) info.badged[side]++;
       }
@@ -931,6 +968,7 @@
   }).observe(document.body, { childList: true, subtree: true });
 
   window.addEventListener('resize', schedule);
+  setInterval(schedule, 60e3); // dim badges as their events end
 
   loadAll(false);
   setInterval(() => loadAll(true), CONFIG.refreshMinutes * 60e3);
