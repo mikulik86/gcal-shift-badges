@@ -4,7 +4,7 @@ A userscript for shift workers. It shows the events of up to two Google calendar
 
 ![Month view with shift badges in both top corners of each day](images/month-view.svg)
 
-The badges come from the calendars' iCal feeds. Their normal event bars are not touched: tick or untick the calendars in Google Calendar's left sidebar, whichever you prefer.
+The badges come from the calendars' iCal feeds. Their normal event bars are not touched: tick or untick the calendars in Google Calendar's left sidebar, whichever you prefer. Recurring events work too, including single occurrences you moved, renamed or deleted.
 
 ## Install
 
@@ -50,7 +50,7 @@ Tampermonkey menu → **Shift badges: diagnose** shows the feed status of both c
 - Each corner gets at most half the day width minus the day number; in narrow windows badges are cut off with "…".
 - Only Google Calendar iCal addresses are supported.
 - Google Calendar's page structure is undocumented and changes from time to time, which can break the script until it is adjusted.
-- Recurring events (`RRULE`) in the feed are not expanded; one event per shift works fine.
+- Events with a time show on the day they start, so a night shift from 18:00 to 06:00 gets one badge, on its first day.
 
 Pictures are illustrations with sample data.
 

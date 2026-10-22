@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Calendar – Shift Badges
 // @namespace    gcal-shift-badges
-// @version      3.0.0
+// @version      3.1.0
 // @description  Shows the events of up to two Google calendars as small colored badges in the top corners of each day in Google Calendar's month view (e.g. shifts on the right, vacation on the left), like aCalendar's corner info.
 // @author       mikulik86
 // @license      MIT
@@ -312,61 +312,313 @@
   }
 
   /* ---------------------------- iCal feeds --------------------------- */
-  const feeds = new Map(); // url → { byDate, events, fetchedAt, error, loading }
+  // A feed keeps one-off events by day and recurring events as rules; the
+  // rules are expanded only for the days on screen.
+  const feeds = new Map(); // url → { singles, series, events, recurring, ranges, fetchedAt, error, loading }
 
   function feed(url) {
-    if (!feeds.has(url)) feeds.set(url, { byDate: new Map(), events: 0, fetchedAt: 0, error: null, loading: false });
+    if (!feeds.has(url)) {
+      feeds.set(url, { singles: new Map(), series: [], events: 0, recurring: 0, ranges: new Map(), fetchedAt: 0, error: null, loading: false });
+    }
     return feeds.get(url);
   }
 
   const activeUrls = () => [...new Set(SIDES.map((s) => settings[s].url).filter(Boolean))];
 
-  function parseIcsDate(value) {
-    const m = value.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?$/);
-    if (!m) return null;
-    if (!m[4]) return { date: new Date(+m[1], +m[2] - 1, +m[3]), allDay: true };
-    if (m[7]) return { date: new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6])), allDay: false };
-    return { date: new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]), allDay: false };
+  // Days are counted as day numbers (days since 1970-01-01) of a calendar date,
+  // which keeps the arithmetic free of time zones and daylight saving.
+  const DAY_MS = 864e5;
+  const WD = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+  const dnOf = (y, mo, d) => Math.round(Date.UTC(y, mo, d) / DAY_MS);
+  const dnLocal = (date) => dnOf(date.getFullYear(), date.getMonth(), date.getDate());
+  const fromDn = (dn) => { const x = new Date(dn * DAY_MS); return { y: x.getUTCFullYear(), mo: x.getUTCMonth(), d: x.getUTCDate() }; };
+  const ymdDn = (dn) => { const w = fromDn(dn); return `${w.y}-${pad(w.mo + 1)}-${pad(w.d)}`; };
+  const wdOf = (dn) => (((dn + 4) % 7) + 7) % 7; // 1970-01-01 was a Thursday
+  const daysIn = (y, mo) => new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  const seq = (a, n) => Array.from({ length: n }, (_, i) => a + i);
+
+  // Offset (ms) of an IANA time zone at instant t, or null for an unknown zone.
+  const tzFormats = new Map();
+  function tzOffset(tz, t) {
+    if (!tzFormats.has(tz)) {
+      let f = null;
+      try {
+        f = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+      } catch (e) { /* not an IANA zone name */ }
+      tzFormats.set(tz, f);
+    }
+    const f = tzFormats.get(tz);
+    if (!f) return null;
+    const p = {};
+    for (const x of f.formatToParts(new Date(t))) p[x.type] = +x.value;
+    return Date.UTC(p.year, p.month - 1, p.day, p.hour % 24, p.minute, p.second) - Math.floor(t / 1000) * 1000;
   }
+
+  // Clock time in the event's zone → Date. tm.tz: 'UTC', an IANA name, or null (local time).
+  function wallToDate(y, mo, d, tm) {
+    const wall = Date.UTC(y, mo, d, tm.h, tm.mi, tm.s);
+    if (tm.tz === 'UTC') return new Date(wall);
+    const o1 = tm.tz ? tzOffset(tm.tz, wall) : null;
+    if (o1 === null) return new Date(y, mo, d, tm.h, tm.mi, tm.s);
+    const o2 = tzOffset(tm.tz, wall - o1);
+    return new Date(wall - o2);
+  }
+
+  // → { y, mo, d, allDay, tm, date }; date is the start as a local Date.
+  function parseIcsDate(value, params = {}) {
+    const m = /^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?$/i.exec(String(value).trim());
+    if (!m) return null;
+    const p = { y: +m[1], mo: +m[2] - 1, d: +m[3] };
+    if (!m[4]) return { ...p, allDay: true, tm: null, date: new Date(p.y, p.mo, p.d) };
+    p.allDay = false;
+    p.tm = { h: +m[4], mi: +m[5], s: +m[6], tz: m[7] ? 'UTC' : (params.TZID || null) };
+    p.date = wallToDate(p.y, p.mo, p.d, p.tm);
+    return p;
+  }
+
+  const parseDates = (value, params) => value.split(',').map((v) => parseIcsDate(v, params)).filter(Boolean);
+
+  // "NAME;PARAM=x;…:value" → { name, params, value }
+  function splitProp(line) {
+    let q = false, i = 0;
+    for (; i < line.length; i++) {
+      if (line[i] === '"') q = !q;
+      else if (line[i] === ':' && !q) break;
+    }
+    if (i >= line.length) return null;
+    const [name, ...ps] = line.slice(0, i).split(';');
+    const params = {};
+    for (const x of ps) {
+      const k = x.indexOf('=');
+      if (k > 0) params[x.slice(0, k).toUpperCase()] = x.slice(k + 1).replace(/^"|"$/g, '');
+    }
+    return { name: name.toUpperCase(), params, value: line.slice(i + 1) };
+  }
+
+  // RRULE value → rule, or null when it can't be expanded (e.g. hourly).
+  function parseRule(value) {
+    const r = {};
+    for (const part of value.split(';')) {
+      const i = part.indexOf('=');
+      if (i > 0) r[part.slice(0, i).trim().toUpperCase()] = part.slice(i + 1).trim().toUpperCase();
+    }
+    if (!/^(DAILY|WEEKLY|MONTHLY|YEARLY)$/.test(r.FREQ || '')) return null;
+    const ints = (s) => (s ? s.split(',').map(Number).filter((n) => Number.isInteger(n) && n !== 0) : []);
+    const count = parseInt(r.COUNT, 10);
+    return {
+      freq: r.FREQ,
+      interval: Math.max(1, parseInt(r.INTERVAL, 10) || 1),
+      count: count > 0 ? count : 0,
+      until: r.UNTIL ? parseIcsDate(r.UNTIL) : null,
+      byday: (r.BYDAY ? r.BYDAY.split(',') : [])
+        .map((x) => /^([+-]?\d{1,2})?(MO|TU|WE|TH|FR|SA|SU)$/.exec(x.trim())).filter(Boolean)
+        .map((m) => ({ n: m[1] ? +m[1] : 0, wd: WD[m[2]] })),
+      bymonthday: ints(r.BYMONTHDAY).filter((n) => n >= -31 && n <= 31),
+      bymonth: ints(r.BYMONTH).filter((n) => n >= 1 && n <= 12),
+      bysetpos: ints(r.BYSETPOS),
+      wkst: r.WKST in WD ? WD[r.WKST] : 1,
+    };
+  }
+
+  // Every given weekday among days, or the n-th of it (1, 2, … or -1 = last).
+  function pickWeekdays(days, byday) {
+    const out = [];
+    for (const b of byday) {
+      const all = days.filter((dn) => wdOf(dn) === b.wd);
+      if (!b.n) out.push(...all);
+      else {
+        const x = b.n > 0 ? all[b.n - 1] : all[all.length + b.n];
+        if (x !== undefined) out.push(x);
+      }
+    }
+    return out;
+  }
+
+  function monthDays(y, mo, rule, startDay) {
+    const n = daysIn(y, mo), first = dnOf(y, mo, 1);
+    if (rule.bymonthday.length) {
+      const days = rule.bymonthday.map((x) => (x > 0 ? x : n + 1 + x)).filter((x) => x >= 1 && x <= n).map((x) => first + x - 1);
+      return rule.byday.length ? days.filter((dn) => rule.byday.some((b) => b.wd === wdOf(dn))) : days;
+    }
+    if (rule.byday.length) return pickWeekdays(seq(first, n), rule.byday);
+    return startDay <= n ? [first + startDay - 1] : [];
+  }
+
+  // The p-th day, week, month or year of a series: { start, days }.
+  function period(rule, s, p) {
+    const step = p * rule.interval;
+    let start, days;
+    if (rule.freq === 'DAILY') {
+      start = s.dn + step;
+      const w = fromDn(start);
+      const ok = (!rule.bymonth.length || rule.bymonth.includes(w.mo + 1))
+        && (!rule.bymonthday.length || rule.bymonthday.some((x) => (x > 0 ? x : daysIn(w.y, w.mo) + 1 + x) === w.d))
+        && (!rule.byday.length || rule.byday.some((b) => b.wd === wdOf(start)));
+      days = ok ? [start] : [];
+    } else if (rule.freq === 'WEEKLY') {
+      start = s.dn - ((wdOf(s.dn) - rule.wkst + 7) % 7) + step * 7;
+      const wds = rule.byday.length ? rule.byday.map((b) => b.wd) : [wdOf(s.dn)];
+      days = seq(start, 7).filter((dn) => wds.includes(wdOf(dn)) && (!rule.bymonth.length || rule.bymonth.includes(fromDn(dn).mo + 1)));
+    } else if (rule.freq === 'MONTHLY') {
+      const mi = s.mo + step, y = s.y + Math.floor(mi / 12), mo = ((mi % 12) + 12) % 12;
+      start = dnOf(y, mo, 1);
+      days = !rule.bymonth.length || rule.bymonth.includes(mo + 1) ? monthDays(y, mo, rule, s.d) : [];
+    } else {
+      const y = s.y + step;
+      start = dnOf(y, 0, 1);
+      if (rule.byday.length && !rule.bymonth.length && !rule.bymonthday.length) {
+        days = pickWeekdays(seq(start, dnOf(y + 1, 0, 1) - start), rule.byday);
+      } else {
+        const months = rule.bymonth.length ? rule.bymonth.map((m) => m - 1) : rule.bymonthday.length ? seq(0, 12) : [s.mo];
+        days = months.flatMap((mo) => monthDays(y, mo, rule, s.d));
+      }
+    }
+    days = [...new Set(days)].sort((a, b) => a - b);
+    if (rule.bysetpos.length) {
+      const all = days;
+      days = [...new Set(rule.bysetpos.map((i) => (i > 0 ? all[i - 1] : all[all.length + i])).filter((x) => x !== undefined))].sort((a, b) => a - b);
+    }
+    return { start, days };
+  }
+
+  // Calls emit(date) with the start of each occurrence up to day number hi
+  // (occurrences well before lo are counted but not converted).
+  function expandSeries(sr, lo, hi, emit) {
+    const { rule, s } = sr;
+    const u = rule.until;
+    let limitDn = Infinity, limitMs = Infinity;
+    if (u) {
+      if (u.allDay) limitDn = dnOf(u.y, u.mo, u.d);
+      else if (!sr.tm) limitDn = dnLocal(u.date);
+      else { limitMs = u.date.getTime(); limitDn = dnLocal(u.date) + 2; }
+    }
+    let n = 0;
+    const take = (dn) => {
+      if (dn > limitDn) return false;
+      if (rule.count && ++n > rule.count) return false;
+      if (dn < lo - 2) return true;
+      const w = fromDn(dn);
+      const date = sr.tm ? wallToDate(w.y, w.mo, w.d, sr.tm) : new Date(w.y, w.mo, w.d);
+      if (date.getTime() > limitMs) return false;
+      emit(date);
+      return true;
+    };
+    if (!take(s.dn)) return; // DTSTART is always the first occurrence
+    for (let p = 0; p < 40000; p++) {
+      const { start, days } = period(rule, s, p);
+      if (start > hi + 2) return;
+      for (const dn of days) {
+        if (dn <= s.dn) continue;
+        if (dn > hi + 2 || !take(dn)) return;
+      }
+    }
+  }
+
+  // Titles of the recurring events per day (YYYY-MM-DD), for day numbers lo…hi.
+  function seriesDays(f, lo, hi) {
+    const key = `${lo}:${hi}`;
+    if (f.ranges.has(key)) return f.ranges.get(key);
+    const map = new Map();
+    for (const sr of f.series) {
+      const put = (date) => {
+        if (sr.ex.has(ymd(date))) return;
+        const d0 = dnLocal(date);
+        for (let i = 0; i < sr.days; i++) {
+          if (d0 + i < lo || d0 + i > hi) continue;
+          const k = ymdDn(d0 + i);
+          if (!map.has(k)) map.set(k, []);
+          map.get(k).push(sr.summary);
+        }
+      };
+      expandSeries(sr, lo - sr.days, hi, put);
+      for (const r of sr.rdates) put(r.date);
+    }
+    if (f.ranges.size > 8) f.ranges.clear();
+    f.ranges.set(key, map);
+    return map;
+  }
+
+  // Titles on one day: one-off events first, then recurring ones.
+  const titlesOn = (f, day, rec) => [...(f.singles.get(day) || []), ...(rec.get(day) || [])];
 
   function parseIcs(text) {
     const lines = text.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '').split(/\r?\n/);
-    const byDate = new Map();
-    let ev = null, count = 0;
+    const all = [];
+    let ev = null, depth = 0;
     for (const line of lines) {
-      if (line === 'BEGIN:VEVENT') { ev = {}; continue; }
-      if (line === 'END:VEVENT') {
-        if (ev && ev.start && ev.summary && ev.status !== 'CANCELLED') {
-          count++;
-          const first = new Date(ev.start.date.getFullYear(), ev.start.date.getMonth(), ev.start.date.getDate());
-          let days = 1;
-          if (ev.start.allDay && ev.end && ev.end.allDay) {
-            days = Math.max(1, Math.round((ev.end.date - ev.start.date) / 864e5));
-          }
-          for (let i = 0; i < Math.min(days, 62); i++) {
-            const key = ymd(addDays(first, i));
-            if (!byDate.has(key)) byDate.set(key, []);
-            byDate.get(key).push(ev.summary);
-          }
-        }
-        ev = null; continue;
+      if (!ev) {
+        if (/^BEGIN:VEVENT\s*$/i.test(line)) { ev = { ex: [], rdates: [] }; depth = 0; }
+        continue;
       }
-      if (!ev) continue;
-      const idx = line.indexOf(':');
-      if (idx < 0) continue;
-      const name = line.slice(0, idx).split(';')[0].toUpperCase();
-      const value = line.slice(idx + 1);
-      if (name === 'DTSTART') ev.start = parseIcsDate(value);
-      else if (name === 'DTEND') ev.end = parseIcsDate(value);
-      else if (name === 'SUMMARY') ev.summary = value.replace(/\\n/gi, ' ').replace(/\\([,;\\])/g, '$1').trim();
-      else if (name === 'STATUS') ev.status = value.trim().toUpperCase();
+      if (/^END:/i.test(line)) {
+        if (depth) depth--;
+        else { all.push(ev); ev = null; }
+        continue;
+      }
+      if (/^BEGIN:/i.test(line)) { depth++; continue; }
+      if (depth) continue; // reminders (VALARM) inside the event
+      const p = splitProp(line);
+      if (!p) continue;
+      const v = p.value;
+      if (p.name === 'DTSTART') ev.start = parseIcsDate(v, p.params);
+      else if (p.name === 'DTEND') ev.end = parseIcsDate(v, p.params);
+      else if (p.name === 'DURATION') ev.duration = v.trim().toUpperCase();
+      else if (p.name === 'SUMMARY') ev.summary = v.replace(/\\n/gi, ' ').replace(/\\([,;\\])/g, '$1').trim();
+      else if (p.name === 'STATUS') ev.status = v.trim().toUpperCase();
+      else if (p.name === 'UID') ev.uid = v.trim();
+      else if (p.name === 'RRULE') ev.rule = parseRule(v);
+      else if (p.name === 'EXDATE') ev.ex.push(...parseDates(v, p.params));
+      else if (p.name === 'RDATE' && !/^PERIOD$/i.test(p.params.VALUE || '')) ev.rdates.push(...parseDates(v, p.params));
+      else if (p.name === 'RECURRENCE-ID') ev.rid = parseIcsDate(v, p.params);
     }
-    return { byDate, count };
+
+    // Length in days of an all-day event; timed events count on their start day.
+    const length = (e) => {
+      if (!e.start.allDay) return 1;
+      let n = 1;
+      if (e.end && e.end.allDay) n = dnOf(e.end.y, e.end.mo, e.end.d) - dnOf(e.start.y, e.start.mo, e.start.d);
+      else {
+        const m = /^P(?:(\d+)W)?(?:(\d+)D)?/.exec(e.duration || '');
+        if (m && (m[1] || m[2])) n = (+m[1] || 0) * 7 + (+m[2] || 0);
+      }
+      return Math.min(62, Math.max(1, n));
+    };
+
+    const events = all.filter((e) => e.start && e.summary);
+    const masters = new Map();
+    for (const e of events) if (e.rule && !e.rid && e.uid) masters.set(e.uid, e);
+    const singles = new Map(), series = [];
+    let count = 0;
+    const addSingle = (e) => {
+      const d0 = dnLocal(e.start.date);
+      for (let i = 0; i < length(e); i++) {
+        const k = ymdDn(d0 + i);
+        if (!singles.has(k)) singles.set(k, []);
+        singles.get(k).push(e.summary);
+      }
+    };
+    for (const e of events) {
+      if (e.rid) { // one changed or cancelled occurrence of a recurring event
+        const m = masters.get(e.uid);
+        if (m) m.ex.push(e.rid);
+        if (e.status !== 'CANCELLED') addSingle(e);
+        continue;
+      }
+      if (e.status === 'CANCELLED') continue;
+      count++;
+      if (!e.rule) { addSingle(e); continue; }
+      series.push({
+        summary: e.summary, rule: e.rule, tm: e.start.tm, days: length(e), rdates: e.rdates, exList: e.ex,
+        s: { y: e.start.y, mo: e.start.mo, d: e.start.d, dn: dnOf(e.start.y, e.start.mo, e.start.d) },
+      });
+    }
+    for (const sr of series) { sr.ex = new Set(sr.exList.map((x) => ymd(x.date))); delete sr.exList; }
+    return { singles, series, count };
   }
 
   function applyText(f, text, t) {
-    const { byDate, count } = parseIcs(text);
-    f.byDate = byDate; f.events = count; f.fetchedAt = t; f.error = null;
+    const { singles, series, count } = parseIcs(text);
+    Object.assign(f, { singles, series, events: count, recurring: series.length, ranges: new Map(), fetchedAt: t, error: null });
   }
 
   function saveCache(url, t, text) {
@@ -397,7 +649,7 @@
         } else {
           applyText(f, res.responseText, Date.now());
           saveCache(url, f.fetchedAt, res.responseText);
-          log(`feed: ${f.events} events`);
+          log(`feed: ${f.events} events, ${f.recurring} recurring`);
         }
         schedule();
         updatePanel();
@@ -408,9 +660,14 @@
 
   const loadAll = (force) => activeUrls().forEach((u) => loadFeed(u, force));
 
+  // Titles in the feed, most frequent first (recurring ones counted over ±1 year).
   function titlesOf(url) {
-    const counts = new Map();
-    for (const list of feed(url).byDate.values()) for (const t of list) counts.set(t, (counts.get(t) || 0) + 1);
+    const f = feed(url), counts = new Map();
+    const today = dnLocal(new Date());
+    for (const m of [f.singles, seriesDays(f, today - 366, today + 366)]) {
+      for (const list of m.values()) for (const t of list) counts.set(t, (counts.get(t) || 0) + 1);
+    }
+    for (const sr of f.series) if (!counts.has(sr.summary)) counts.set(sr.summary, 1);
     return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([t]) => t);
   }
 
@@ -461,13 +718,18 @@
     info.firstDate = ymd(dates[0]);
     info.lastDate = ymd(dates[dates.length - 1]);
 
+    // recurring events, expanded for the days on screen
+    const lo = dnLocal(dates[0]), hi = dnLocal(dates[dates.length - 1]);
+    const rec = {};
+    for (const side of SIDES) if (settings[side].url) rec[side] = seriesDays(feed(settings[side].url), lo, hi);
+
     cells.forEach((c, i) => {
       const day = ymd(dates[i]);
       for (const side of SIDES) {
         const url = settings[side].url;
         const list = [];
         if (url) {
-          for (const title of feed(url).byDate.get(day) || []) {
+          for (const title of titlesOn(feed(url), day, rec[side])) {
             const b = badgeFor(side, title);
             if (b && !list.some((x) => x.text === b.text && x.bg === b.bg)) list.push(b);
           }
@@ -623,7 +885,7 @@
     status.className = 'gcsb-status' + (f && f.error ? ' gcsb-errtext' : '');
     status.textContent = !url ? 'No address – this corner shows nothing.'
       : f.error ? `Feed error: ${f.error}`
-        : f.fetchedAt ? `${f.events} events loaded (${new Date(f.fetchedAt).toLocaleTimeString()})` : 'Loading …';
+        : f.fetchedAt ? `${f.events} events loaded${f.recurring ? `, ${f.recurring} of them recurring` : ''} (${new Date(f.fetchedAt).toLocaleTimeString()})` : 'Loading …';
 
     const titles = url ? titlesOf(url) : [];
     datalist.replaceChildren(...titles.slice(0, 500).map((t) => el('option', { value: t })));
@@ -686,7 +948,7 @@
         const url = settings[s].url;
         if (!url) return `${SIDE_LABEL[s]}: no address`;
         const f = feed(url);
-        return `${SIDE_LABEL[s]}: ${f.events} events, ${settings[s].rules.length} rules, `
+        return `${SIDE_LABEL[s]}: ${f.events} events (${f.recurring} recurring), ${settings[s].rules.length} rules, `
           + (f.error ? `error: ${f.error}` : `last loaded ${f.fetchedAt ? new Date(f.fetchedAt).toLocaleString() : 'never'}`);
       });
       lines.push(`View detected: ${i.view}`, `Day cells: ${i.cells} in ${i.rows} rows`);
