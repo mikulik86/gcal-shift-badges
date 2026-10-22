@@ -1,0 +1,60 @@
+<h2>Your shift plan, right in Google Calendar's month view</h2>
+
+<p>Shift Badges shows the events of up to two Google calendars as small colored badges in the top corners of each day – for example your shifts on the right and your partner's on the left, like the corner info in the aCalendar app. You see at a glance who works when, while your appointments keep the whole day box.</p>
+
+<p><img src="https://raw.githubusercontent.com/mikulik86/gcal-shift-badges/main/images/month-view.svg" alt="Google Calendar month view with colored shift badges in both top corners of each day" width="800"></p>
+
+<h3>Features</h3>
+<ul>
+  <li><b>Two corners, two calendars</b> – each corner has its own calendar and its own rules.</li>
+  <li><b>Any text as a badge</b> – every event shows with its title; long titles are cut off with “…”.</li>
+  <li><b>Rules for text and color</b> – match a title as plain text (ignoring case and accents) or with a regular expression, show something shorter instead (“Night shift” → N), pick a color, or hide events you don't want.</li>
+  <li><b>Recurring events</b> – repeating events show on every day they occur, including single occurrences you moved, renamed or deleted.</li>
+  <li><b>Read from the calendars' iCal feeds</b> – so both calendars can stay hidden in the sidebar and don't clutter the month view.</li>
+  <li><b>Your events stay untouched</b> – the script never changes, moves or hides any event bar.</li>
+  <li><b>Light and dark theme</b> – the badge text switches to dark on light colors automatically.</li>
+  <li><b>Private</b> – addresses and rules are stored only in your userscript manager and survive script updates; the script talks to nothing but calendar.google.com.</li>
+</ul>
+
+<p><img src="https://raw.githubusercontent.com/mikulik86/gcal-shift-badges/main/images/close-up.svg" alt="Close-up of one week: shift badges in the right corners, a second calendar's badges in the left corners, ordinary events below" width="800"></p>
+
+<h3>Setup</h3>
+<ol>
+  <li>In Google Calendar open <b>Settings → your shift calendar → Integrate calendar</b> and copy the <b>Secret address in iCal format</b>.</li>
+  <li>Open Google Calendar in month view, click the Tampermonkey (or Violentmonkey) icon → <b>Shift badges: settings</b>.</li>
+  <li>Paste the address on the <b>Right corner</b> tab – every event of that calendar now shows as a badge.</li>
+  <li>Optional: put a second calendar on the <b>Left corner</b> tab, and untick both calendars in the sidebar – the badges stay.</li>
+</ol>
+
+<p><img src="https://raw.githubusercontent.com/mikulik86/gcal-shift-badges/main/images/setup.svg" alt="Three setup steps: copy the secret iCal address, paste it in the settings, badges appear" width="800"></p>
+
+<p>The feeds are reloaded every 30 minutes, or right away via <b>Shift badges: reload now</b>.</p>
+
+<p><b>Chrome / Edge:</b> Tampermonkey needs <b>Allow User Scripts</b> switched on (<code>chrome://extensions</code> → Tampermonkey → Details).</p>
+
+<h3>Rules</h3>
+<p>Each corner has its own list of rules. A rule changes the badges whose title it matches:</p>
+<ul>
+  <li><b>Pattern</b> – plain text matches the whole title, ignoring case and accents (<code>dovolena</code> matches “Dovolená”). Write <code>/…/</code> for a regular expression, e.g. <code>/^D\d+$/</code>; add <code>i</code> after the closing slash to ignore case.</li>
+  <li><b>Show as</b> – optional shorter text. With a regex, <code>$1</code> inserts the first group: <code>/^Day shift (\d+)$/</code> shown as <code>D$1</code> turns “Day shift 11” into D11.</li>
+  <li><b>Color</b> and <b>Hide</b> – the badge color, or no badge at all for matching events.</li>
+</ul>
+<p>Events no rule matches show their title in grey. Plain text wins over regex, otherwise the upper rule wins. Under each rule the panel lists the titles it takes and shows an error for an invalid regex – <a href="https://regex101.com">regex101.com</a> helps to build and test patterns.</p>
+
+<p><img src="https://raw.githubusercontent.com/mikulik86/gcal-shift-badges/main/images/settings-panel.svg" alt="The settings panel: tabs for both corners, the iCal address and rules with pattern, show as, color and hide" width="560"></p>
+
+<p><img src="https://raw.githubusercontent.com/mikulik86/gcal-shift-badges/main/images/month-view-dark.svg" alt="The same month view in Google Calendar's dark theme" width="800"></p>
+
+<h3>Good to know</h3>
+<ul>
+  <li>Month view in a desktop browser only; the Google Calendar mobile apps are not affected.</li>
+  <li>Each corner gets at most half the day width minus the day number; in narrow windows badges are cut off sooner.</li>
+  <li>Only Google Calendar iCal addresses are supported, and Google can take a while to publish changes in the feed.</li>
+  <li>Events with a time show on the day they start, so a night shift from 18:00 to 06:00 gets one badge, on its first day.</li>
+  <li>Settings are stored per browser. On another computer, set them up again or use your userscript manager's sync.</li>
+  <li>Google changes its page from time to time, which can break the script until it is adjusted.</li>
+</ul>
+
+<p>Something not working? Tampermonkey menu → <b>Shift badges: diagnose</b> (it leaves out your secret addresses), and include its output in a report on <a href="https://github.com/mikulik86/gcal-shift-badges/issues">GitHub</a>. Source code: <a href="https://github.com/mikulik86/gcal-shift-badges">github.com/mikulik86/gcal-shift-badges</a> (MIT license).</p>
+
+<p><small>Pictures are illustrations with sample data.</small></p>
