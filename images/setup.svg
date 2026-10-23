@@ -31,10 +31,10 @@
 <rect x="330" y="243" width="11" height="13" rx="2" fill="#fff" stroke="#5f6368" stroke-width="1.5"/>
 <rect x="444" y="100" width="312" height="190" rx="10" fill="#ffffff" stroke="#dadce0"/>
 <text x="460" y="128" font-size="14" font-weight="600" fill="#1f1f1f">Shift badges</text>
-<text x="460" y="156" font-size="12" font-weight="600" fill="#1f1f1f">Right corner</text>
-<text x="556" y="156" font-size="12" font-weight="400" fill="#5f6368">Left corner</text>
+<text x="460" y="156" font-size="12" font-weight="400" fill="#5f6368">Left corner</text>
+<text x="548.5" y="156" font-size="12" font-weight="600" fill="#1f1f1f">Right corner</text>
 <line x1="460" y1="165" x2="740" y2="165" stroke="#e0e3e7"/>
-<rect x="456" y="163" width="84" height="3" rx="1.5" fill="#1a73e8"/>
+<rect x="544.5" y="163" width="79.5" height="3" rx="1.5" fill="#1a73e8"/>
 <text x="460" y="188" font-size="11.5" font-weight="400" fill="#5f6368">iCal address</text>
 <rect x="460" y="196" width="280" height="30" rx="6" fill="#ffffff" stroke="#1a73e8" stroke-width="2"/>
 <text x="470" y="216" font-size="11.5" font-weight="400" fill="#3c4043">https://calendar.google.com/calendar/ical/x/…</text>

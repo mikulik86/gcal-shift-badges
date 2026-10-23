@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Calendar – Shift Badges
 // @namespace    gcal-shift-badges
-// @version      3.2.0
+// @version      3.2.1
 // @description  Shows the events of up to two Google calendars as small colored badges in the top corners of each day in Google Calendar's month view (e.g. shifts on the right, vacation on the left), like aCalendar's corner info.
 // @author       mikulik86
 // @license      MIT
@@ -44,7 +44,7 @@
   };
   /* ==================================================================== */
 
-  const SIDES = ['right', 'left'];
+  const SIDES = ['left', 'right']; // in screen order: tabs and diagnose list left first
   const SIDE_LABEL = { right: 'Right corner', left: 'Left corner' };
   const WRAP_CLASS = 'gcsb-wrap';
   const BADGE_CLASS = 'gcsb-badge';

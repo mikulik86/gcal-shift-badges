@@ -3,10 +3,10 @@
 <g transform="translate(114 30) scale(1.3)"><rect width="440" height="526" rx="12" fill="#ffffff" filter="url(#sh)"/>
 <text x="16" y="32" font-size="16" font-weight="500" fill="#1f1f1f">Shift badges</text>
 <path d="M412 21 l10 10 M422 21 l-10 10" stroke="#444746" stroke-width="1.8"/>
-<text x="26" y="66" font-size="13" font-weight="500" fill="#1f1f1f">Right corner</text>
-<text x="128" y="66" font-size="13" font-weight="400" fill="#5f6368">Left corner</text>
+<text x="26" y="66" font-size="13" font-weight="400" fill="#5f6368">Left corner</text>
+<text x="123.7" y="66" font-size="13" font-weight="500" fill="#1f1f1f">Right corner</text>
 <line x1="16" y1="77" x2="424" y2="77" stroke="#e0e3e7"/>
-<rect x="16" y="75" width="96" height="3" rx="1.5" fill="#1a73e8"/>
+<rect x="113.7" y="75" width="96.5" height="3" rx="1.5" fill="#1a73e8"/>
 <text x="16" y="100" font-size="12" font-weight="400" fill="#5f6368">iCal address – the calendar’s “Secret address in iCal format”</text>
 <rect x="16" y="108" width="408" height="28" rx="6" fill="#f6f7f8" stroke="#c4c7c5"/>
 <text x="24" y="126.5" font-size="12.5" font-weight="400" fill="#1f1f1f">https://calendar.google.com/calendar/ical/x/private-y/basic.ics</text>
