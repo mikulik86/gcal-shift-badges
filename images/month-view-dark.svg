@@ -38,96 +38,96 @@
 <text x="1116.6" y="86" font-size="11" font-weight="500" fill="#9aa0a6" text-anchor="middle" letter-spacing="0.8">SUN</text>
 <rect x="240" y="96" width="944" height="692" fill="none" stroke="#444746"/>
 <text x="307.4" y="115.5" font-size="12" font-weight="500" fill="#9aa0a6" text-anchor="middle">26</text>
-<rect x="345.8" y="100" width="25.1" height="16" rx="4" fill="#039be5"/>
-<text x="358.3" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
-<rect x="244" y="100" width="14.6" height="16" rx="4" fill="#f4511e"/>
-<text x="251.3" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">E</text>
+<rect x="345.8" y="100" width="25.1" height="16" rx="4" fill="#125e85"/>
+<text x="358.3" y="112" font-size="11" font-weight="500" fill="#6191a8" text-anchor="middle" letter-spacing="0.2">D11</text>
+<rect x="244" y="100" width="14.6" height="16" rx="4" fill="#8a3921"/>
+<text x="251.3" y="112" font-size="11" font-weight="500" fill="#ac7a6b" text-anchor="middle" letter-spacing="0.2">E</text>
 <line x1="374.9" y1="96" x2="374.9" y2="211.3" stroke="#444746" stroke-width="1"/>
 <text x="442.3" y="115.5" font-size="12" font-weight="500" fill="#9aa0a6" text-anchor="middle">27</text>
-<rect x="480.6" y="100" width="25.1" height="16" rx="4" fill="#039be5"/>
-<text x="493.2" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
-<rect x="378.9" y="100" width="14.6" height="16" rx="4" fill="#f4511e"/>
-<text x="386.2" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">E</text>
+<rect x="480.6" y="100" width="25.1" height="16" rx="4" fill="#125e85"/>
+<text x="493.2" y="112" font-size="11" font-weight="500" fill="#6191a8" text-anchor="middle" letter-spacing="0.2">D11</text>
+<rect x="378.9" y="100" width="14.6" height="16" rx="4" fill="#8a3921"/>
+<text x="386.2" y="112" font-size="11" font-weight="500" fill="#ac7a6b" text-anchor="middle" letter-spacing="0.2">E</text>
 <line x1="509.7" y1="96" x2="509.7" y2="211.3" stroke="#444746" stroke-width="1"/>
 <text x="577.1" y="115.5" font-size="12" font-weight="500" fill="#9aa0a6" text-anchor="middle">28</text>
-<rect x="615.1" y="100" width="25.5" height="16" rx="4" fill="#33b679"/>
-<text x="627.8" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">N11</text>
-<rect x="513.7" y="100" width="14.6" height="16" rx="4" fill="#f4511e"/>
-<text x="521" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">E</text>
+<rect x="615.1" y="100" width="25.5" height="16" rx="4" fill="#2a6c4f"/>
+<text x="627.8" y="112" font-size="11" font-weight="500" fill="#709987" text-anchor="middle" letter-spacing="0.2">N11</text>
+<rect x="513.7" y="100" width="14.6" height="16" rx="4" fill="#8a3921"/>
+<text x="521" y="112" font-size="11" font-weight="500" fill="#ac7a6b" text-anchor="middle" letter-spacing="0.2">E</text>
 <line x1="644.6" y1="96" x2="644.6" y2="211.3" stroke="#444746" stroke-width="1"/>
 <text x="712" y="115.5" font-size="12" font-weight="500" fill="#9aa0a6" text-anchor="middle">29</text>
-<rect x="750" y="100" width="25.5" height="16" rx="4" fill="#33b679"/>
-<text x="762.7" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">N11</text>
-<rect x="648.6" y="100" width="14.6" height="16" rx="4" fill="#f4511e"/>
-<text x="655.9" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">E</text>
+<rect x="750" y="100" width="25.5" height="16" rx="4" fill="#2a6c4f"/>
+<text x="762.7" y="112" font-size="11" font-weight="500" fill="#709987" text-anchor="middle" letter-spacing="0.2">N11</text>
+<rect x="648.6" y="100" width="14.6" height="16" rx="4" fill="#8a3921"/>
+<text x="655.9" y="112" font-size="11" font-weight="500" fill="#ac7a6b" text-anchor="middle" letter-spacing="0.2">E</text>
 <line x1="779.4" y1="96" x2="779.4" y2="211.3" stroke="#444746" stroke-width="1"/>
 <text x="846.9" y="115.5" font-size="12" font-weight="500" fill="#9aa0a6" text-anchor="middle">30</text>
-<rect x="783.4" y="100" width="14.6" height="16" rx="4" fill="#f4511e"/>
-<text x="790.7" y="112" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">E</text>
+<rect x="783.4" y="100" width="14.6" height="16" rx="4" fill="#8a3921"/>
+<text x="790.7" y="112" font-size="11" font-weight="500" fill="#ac7a6b" text-anchor="middle" letter-spacing="0.2">E</text>
 <line x1="914.3" y1="96" x2="914.3" y2="211.3" stroke="#444746" stroke-width="1"/>
 <text x="981.7" y="115.5" font-size="12" font-weight="500" fill="#9aa0a6" text-anchor="middle">31</text>
 <line x1="1049.1" y1="96" x2="1049.1" y2="211.3" stroke="#444746" stroke-width="1"/>
 <text x="1116.6" y="115.5" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">Nov 1</text>
-<rect x="916.3" y="128" width="130.9" height="18" rx="4" fill="#f4511e"/>
-<text x="922.3" y="141" font-size="12" font-weight="500" fill="#ffffff">Halloween party</text>
-<circle cx="384.9" cy="137" r="4" fill="#7986cb"/>
-<text x="392.9" y="141" font-size="12" fill="#e3e3e3"><tspan>7pm</tspan><tspan font-weight="500"> Gym</tspan></text>
+<rect x="916.3" y="128" width="130.9" height="18" rx="4" fill="#8a3921"/>
+<text x="922.3" y="141" font-size="12" font-weight="500" fill="#ac7a6b">Halloween party</text>
+<circle cx="384.9" cy="137" r="4" fill="#4d5478"/>
+<text x="392.9" y="141" font-size="12" fill="#696969"><tspan>7pm</tspan><tspan font-weight="500"> Gym</tspan></text>
 <line x1="240" y1="211.3" x2="1184" y2="211.3" stroke="#444746"/>
 <text x="307.4" y="230.8" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">2</text>
-<rect x="345.8" y="215.3" width="25.1" height="16" rx="4" fill="#039be5"/>
-<text x="358.3" y="227.3" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
-<rect x="244" y="215.3" width="14.2" height="16" rx="4" fill="#e4c441"/>
-<text x="251.1" y="227.3" font-size="11" font-weight="500" fill="#202124" text-anchor="middle" letter-spacing="0.2">L</text>
+<rect x="345.8" y="215.3" width="25.1" height="16" rx="4" fill="#125e85"/>
+<text x="358.3" y="227.3" font-size="11" font-weight="500" fill="#6191a8" text-anchor="middle" letter-spacing="0.2">D11</text>
+<rect x="244" y="215.3" width="14.2" height="16" rx="4" fill="#827333"/>
+<text x="251.1" y="227.3" font-size="11" font-weight="500" fill="#a79d76" text-anchor="middle" letter-spacing="0.2">L</text>
 <line x1="374.9" y1="211.3" x2="374.9" y2="326.7" stroke="#444746" stroke-width="1"/>
 <text x="442.3" y="230.8" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">3</text>
-<rect x="480.6" y="215.3" width="25.1" height="16" rx="4" fill="#039be5"/>
-<text x="493.2" y="227.3" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
-<rect x="378.9" y="215.3" width="14.2" height="16" rx="4" fill="#e4c441"/>
-<text x="386" y="227.3" font-size="11" font-weight="500" fill="#202124" text-anchor="middle" letter-spacing="0.2">L</text>
+<rect x="480.6" y="215.3" width="25.1" height="16" rx="4" fill="#125e85"/>
+<text x="493.2" y="227.3" font-size="11" font-weight="500" fill="#6191a8" text-anchor="middle" letter-spacing="0.2">D11</text>
+<rect x="378.9" y="215.3" width="14.2" height="16" rx="4" fill="#827333"/>
+<text x="386" y="227.3" font-size="11" font-weight="500" fill="#a79d76" text-anchor="middle" letter-spacing="0.2">L</text>
 <line x1="509.7" y1="211.3" x2="509.7" y2="326.7" stroke="#444746" stroke-width="1"/>
 <text x="577.1" y="230.8" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">4</text>
-<rect x="615.1" y="215.3" width="25.5" height="16" rx="4" fill="#33b679"/>
-<text x="627.8" y="227.3" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">N11</text>
-<rect x="513.7" y="215.3" width="14.2" height="16" rx="4" fill="#e4c441"/>
-<text x="520.8" y="227.3" font-size="11" font-weight="500" fill="#202124" text-anchor="middle" letter-spacing="0.2">L</text>
+<rect x="615.1" y="215.3" width="25.5" height="16" rx="4" fill="#2a6c4f"/>
+<text x="627.8" y="227.3" font-size="11" font-weight="500" fill="#709987" text-anchor="middle" letter-spacing="0.2">N11</text>
+<rect x="513.7" y="215.3" width="14.2" height="16" rx="4" fill="#827333"/>
+<text x="520.8" y="227.3" font-size="11" font-weight="500" fill="#a79d76" text-anchor="middle" letter-spacing="0.2">L</text>
 <line x1="644.6" y1="211.3" x2="644.6" y2="326.7" stroke="#444746" stroke-width="1"/>
 <text x="712" y="230.8" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">5</text>
-<rect x="750" y="215.3" width="25.5" height="16" rx="4" fill="#33b679"/>
-<text x="762.7" y="227.3" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">N11</text>
-<rect x="648.6" y="215.3" width="14.2" height="16" rx="4" fill="#e4c441"/>
-<text x="655.7" y="227.3" font-size="11" font-weight="500" fill="#202124" text-anchor="middle" letter-spacing="0.2">L</text>
+<rect x="750" y="215.3" width="25.5" height="16" rx="4" fill="#2a6c4f"/>
+<text x="762.7" y="227.3" font-size="11" font-weight="500" fill="#709987" text-anchor="middle" letter-spacing="0.2">N11</text>
+<rect x="648.6" y="215.3" width="14.2" height="16" rx="4" fill="#827333"/>
+<text x="655.7" y="227.3" font-size="11" font-weight="500" fill="#a79d76" text-anchor="middle" letter-spacing="0.2">L</text>
 <line x1="779.4" y1="211.3" x2="779.4" y2="326.7" stroke="#444746" stroke-width="1"/>
 <text x="846.9" y="230.8" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">6</text>
-<rect x="783.4" y="215.3" width="14.2" height="16" rx="4" fill="#e4c441"/>
-<text x="790.5" y="227.3" font-size="11" font-weight="500" fill="#202124" text-anchor="middle" letter-spacing="0.2">L</text>
+<rect x="783.4" y="215.3" width="14.2" height="16" rx="4" fill="#827333"/>
+<text x="790.5" y="227.3" font-size="11" font-weight="500" fill="#a79d76" text-anchor="middle" letter-spacing="0.2">L</text>
 <line x1="914.3" y1="211.3" x2="914.3" y2="326.7" stroke="#444746" stroke-width="1"/>
 <text x="981.7" y="230.8" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">7</text>
 <line x1="1049.1" y1="211.3" x2="1049.1" y2="326.7" stroke="#444746" stroke-width="1"/>
 <text x="1116.6" y="230.8" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">8</text>
-<rect x="916.3" y="243.3" width="265.7" height="18" rx="4" fill="#0b8043"/>
-<text x="922.3" y="256.3" font-size="12" font-weight="500" fill="#ffffff">Weekend trip</text>
-<circle cx="250" cy="252.3" r="4" fill="#7986cb"/>
-<text x="258" y="256.3" font-size="12" fill="#e3e3e3"><tspan>9am</tspan><tspan font-weight="500"> Dentist</tspan></text>
-<circle cx="654.6" cy="252.3" r="4" fill="#8e24aa"/>
-<text x="662.6" y="256.3" font-size="12" fill="#e3e3e3"><tspan>6pm</tspan><tspan font-weight="500"> Book club</tspan></text>
+<rect x="916.3" y="243.3" width="265.7" height="18" rx="4" fill="#165134"/>
+<text x="922.3" y="256.3" font-size="12" font-weight="500" fill="#648876">Weekend trip</text>
+<circle cx="250" cy="252.3" r="4" fill="#4d5478"/>
+<text x="258" y="256.3" font-size="12" fill="#696969"><tspan>9am</tspan><tspan font-weight="500"> Dentist</tspan></text>
+<circle cx="654.6" cy="252.3" r="4" fill="#572367"/>
+<text x="662.6" y="256.3" font-size="12" fill="#696969"><tspan>6pm</tspan><tspan font-weight="500"> Book club</tspan></text>
 <line x1="240" y1="326.7" x2="1184" y2="326.7" stroke="#444746"/>
 <text x="307.4" y="346.2" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">9</text>
-<rect x="345.8" y="330.7" width="25.1" height="16" rx="4" fill="#039be5"/>
-<text x="358.3" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
-<rect x="244" y="330.7" width="14.6" height="16" rx="4" fill="#f4511e"/>
-<text x="251.3" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">E</text>
+<rect x="345.8" y="330.7" width="25.1" height="16" rx="4" fill="#125e85"/>
+<text x="358.3" y="342.7" font-size="11" font-weight="500" fill="#6191a8" text-anchor="middle" letter-spacing="0.2">D11</text>
+<rect x="244" y="330.7" width="14.6" height="16" rx="4" fill="#8a3921"/>
+<text x="251.3" y="342.7" font-size="11" font-weight="500" fill="#ac7a6b" text-anchor="middle" letter-spacing="0.2">E</text>
 <line x1="374.9" y1="326.7" x2="374.9" y2="442" stroke="#444746" stroke-width="1"/>
 <text x="442.3" y="346.2" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">10</text>
-<rect x="480.6" y="330.7" width="25.1" height="16" rx="4" fill="#039be5"/>
-<text x="493.2" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">D11</text>
-<rect x="378.9" y="330.7" width="14.6" height="16" rx="4" fill="#f4511e"/>
-<text x="386.2" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">E</text>
+<rect x="480.6" y="330.7" width="25.1" height="16" rx="4" fill="#125e85"/>
+<text x="493.2" y="342.7" font-size="11" font-weight="500" fill="#6191a8" text-anchor="middle" letter-spacing="0.2">D11</text>
+<rect x="378.9" y="330.7" width="14.6" height="16" rx="4" fill="#8a3921"/>
+<text x="386.2" y="342.7" font-size="11" font-weight="500" fill="#ac7a6b" text-anchor="middle" letter-spacing="0.2">E</text>
 <line x1="509.7" y1="326.7" x2="509.7" y2="442" stroke="#444746" stroke-width="1"/>
 <text x="577.1" y="346.2" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">11</text>
-<rect x="615.1" y="330.7" width="25.5" height="16" rx="4" fill="#33b679"/>
-<text x="627.8" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">N11</text>
-<rect x="513.7" y="330.7" width="24.3" height="16" rx="4" fill="#757575"/>
-<text x="525.9" y="342.7" font-size="11" font-weight="500" fill="#ffffff" text-anchor="middle" letter-spacing="0.2">Off</text>
+<rect x="615.1" y="330.7" width="25.5" height="16" rx="4" fill="#2a6c4f"/>
+<text x="627.8" y="342.7" font-size="11" font-weight="500" fill="#709987" text-anchor="middle" letter-spacing="0.2">N11</text>
+<rect x="513.7" y="330.7" width="24.3" height="16" rx="4" fill="#4b4b4d"/>
+<text x="525.9" y="342.7" font-size="11" font-weight="500" fill="#848586" text-anchor="middle" letter-spacing="0.2">Off</text>
 <line x1="644.6" y1="326.7" x2="644.6" y2="442" stroke="#444746" stroke-width="1"/>
 <circle cx="712" cy="341.7" r="12" fill="#a8c7fa"/>
 <text x="712" y="346.2" font-size="12" font-weight="500" fill="#062e6f" text-anchor="middle">12</text>
@@ -147,10 +147,10 @@
 <text x="1116.6" y="346.2" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">15</text>
 <rect x="916.3" y="358.7" width="130.9" height="18" rx="4" fill="#f6bf26"/>
 <text x="922.3" y="371.7" font-size="12" font-weight="500" fill="#3c4043">Mia's birthday</text>
-<circle cx="384.9" cy="367.7" r="4" fill="#3f51b5"/>
-<text x="392.9" y="371.7" font-size="12" fill="#e3e3e3"><tspan>8am</tspan><tspan font-weight="500"> Car service</tspan></text>
-<circle cx="654.6" cy="367.7" r="4" fill="#8e24aa"/>
-<text x="662.6" y="371.7" font-size="12" fill="#e3e3e3"><tspan>5pm</tspan><tspan font-weight="500"> Parent me…</tspan></text>
+<circle cx="384.9" cy="367.7" r="4" fill="#30396d"/>
+<text x="392.9" y="371.7" font-size="12" fill="#696969"><tspan>8am</tspan><tspan font-weight="500"> Car service</tspan></text>
+<circle cx="789.4" cy="367.7" r="4" fill="#8e24aa"/>
+<text x="797.4" y="371.7" font-size="12" fill="#e3e3e3"><tspan>5pm</tspan><tspan font-weight="500"> Parent me…</tspan></text>
 <line x1="240" y1="442" x2="1184" y2="442" stroke="#444746"/>
 <text x="307.4" y="461.5" font-size="12" font-weight="500" fill="#e3e3e3" text-anchor="middle">16</text>
 <rect x="339.1" y="446" width="31.8" height="16" rx="4" fill="#e67c73"/>
